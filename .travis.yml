@@ -1,0 +1,13 @@
+language: php
+
+php:
+  - 7.4
+
+before_install:
+  - composer self-update
+
+install:
+  - make _install
+
+script:
+  - make _ci

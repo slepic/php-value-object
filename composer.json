@@ -1,0 +1,26 @@
+{
+    "name": "slepic/value-object",
+    "description": "Simple value objects and enums",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "slepic",
+            "email": "gslepic@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^7.4 || ^8.0"
+    },
+    "require-dev": {
+        "vimeo/psalm": "^3.11",
+        "phpunit/phpunit": "^9.1",
+        "squizlabs/php_codesniffer": "^3.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Slepic\\ValueObject\\": "src"
+        }
+    }
+}
