@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<ruleset name="Slepic Code Style" namespace="Slepic\CodeStyle">
+    <rule ref="PSR2" />
+    <rule ref="Generic.PHP.RequireStrictTypes" />
+</ruleset>

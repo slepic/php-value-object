@@ -1,13 +1,11 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Slepic\Tests\ValueObject;
 
 use PHPUnit\Framework\TestCase;
 use Slepic\ValueObject\TypeError;
 
-class TypeErrorTest extends TestCase
+final class TypeErrorTest extends TestCase
 {
     /**
      * @param $value

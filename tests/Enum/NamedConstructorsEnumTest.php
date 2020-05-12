@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Slepic\Tests\ValueObject\Enum;
 
 use PHPUnit\Framework\TestCase;
 use Slepic\ValueObject\Strings\StringValueExceptionInterface;
 
-class NamedConstructorsEnumTest extends TestCase
+final class NamedConstructorsEnumTest extends TestCase
 {
     public function testNamedConstructor(): void
     {

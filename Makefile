@@ -1,7 +1,7 @@
 .phony: install test cs-check cs-fix psalm
 
 DOCKER=docker-compose run --rm php
-CS=--standard=PSR2 src tests
+CS=--standard=ruleset.xml src tests
 
 INSTALL=composer install --no-interaction
 TEST=vendor/bin/phpunit --colors=always tests
