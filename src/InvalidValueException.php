@@ -27,9 +27,9 @@ class InvalidValueException extends \InvalidArgumentException implements Invalid
     ) {
         if (!$message) {
             if ($expectation !== null) {
-                $message = "Expected $expectation got \"{$this->value}\".";
+                $message = "Expected $expectation got \"$value\".";
             } else {
-                $message = "\"{$this->value}\" not expected.";
+                $message = "\"$value\" not expected.";
             }
         }
         $this->value = $value;

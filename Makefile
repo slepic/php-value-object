@@ -4,7 +4,7 @@ DOCKER=docker-compose run --rm php
 CS=--standard=PSR2 src tests
 
 INSTALL=composer install --no-interaction
-TEST=vendor/bin/phpunit tests
+TEST=vendor/bin/phpunit --colors=always tests
 CSCHECK=vendor/bin/phpcs $(CS)
 CSFIX=vendor/bin/phpcbf $(CS)
 PSALM=vendor/bin/psalm
