@@ -2,9 +2,7 @@
 
 namespace Slepic\ValueObject\Enum;
 
-use Slepic\ValueObject\Strings\StringValueException;
-use Slepic\ValueObject\Strings\StringValueExceptionInterface;
-use Slepic\ValueObject\Strings\StringValueObject;
+use Slepic\ValueObject\Strings\StringValue;
 
 /**
  * This enum looks up all named constructors to build the list of allowed values.
@@ -22,58 +20,8 @@ use Slepic\ValueObject\Strings\StringValueObject;
  *
  * All unique instances can be obtained using the static method `static::all()`.
  */
-abstract class NamedConstructorsEnum extends StringValueObject implements StringEnumInterface
+abstract class NamedConstructorsEnum extends StringEnumBase
 {
-    /**
-     * @var array<string, static>|null
-     */
-    private static ?array $all = null;
-
-    private function __construct(string $value)
-    {
-        parent::__construct($value);
-    }
-
-    /**
-     * @return array<string, static>
-     */
-    final public static function all(): array
-    {
-        if (static::$all === null) {
-            static::$all = static::createAllUniqueInstances();
-        }
-        return static::$all;
-    }
-
-    /**
-     * @param string $value
-     * @return static
-     * @throws StringValueExceptionInterface
-     */
-    final public static function fromString(string $value): self
-    {
-        $all = static::all();
-        if (isset($all[$value])) {
-            return $all[$value];
-        }
-        throw static::createInvalidValueException($value, $all);
-    }
-
-    /**
-     * @param string $value
-     * @param array<string, static> $allowed
-     * @return StringValueExceptionInterface
-     */
-    protected static function createInvalidValueException(string $value, array $allowed): StringValueExceptionInterface
-    {
-        return new StringValueException(
-            $value,
-            \sprintf(
-                'one of %s',
-                \implode('|', \array_map(fn($v) => (string) $v, $allowed))
-            ),
-        );
-    }
 
     /**
      * This method is intended to implement all named constructors
@@ -95,7 +43,7 @@ abstract class NamedConstructorsEnum extends StringValueObject implements String
         }
         try {
             return static::fromString($parts[1]);
-        } catch (StringValueExceptionInterface $e) {
+        } catch (StringEnumExceptionInterface $e) {
             throw new \LogicException(
                 static::class . ' is malfunctioning or you call __() not from a named constructor.',
                 (int) $e->getCode(),
@@ -104,17 +52,15 @@ abstract class NamedConstructorsEnum extends StringValueObject implements String
         }
     }
 
-    /**
-     * @return array<string, static>
-     */
-    private static function createAllUniqueInstances(): array
+    final protected static function createAllUniqueValues(): array
     {
         $all = [];
         $reflection = new \ReflectionClass(static::class);
-        foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-            $instance = static::createFromReflectionMethod($method);
-            if ($instance !== null) {
-                $all[$method->getName()] = $instance;
+        $methods = $reflection->getMethods(\ReflectionMethod::IS_PUBLIC | \ReflectionMethod::IS_STATIC);
+        foreach ($methods as $method) {
+            if (static::isUsableNamedConstructor($method)) {
+                $methodName = $method->getName();
+                $all[] = $methodName;
             }
         }
         return $all;
@@ -122,21 +68,21 @@ abstract class NamedConstructorsEnum extends StringValueObject implements String
 
     /**
      * @param \ReflectionMethod $method
-     * @return static|null
+     * @return bool
      */
-    private static function createFromReflectionMethod(\ReflectionMethod $method): ?self
+    private static function isUsableNamedConstructor(\ReflectionMethod $method): bool
     {
         $parameters = $method->getParameters();
         if (\count($parameters) !== 0) {
-            return null;
+            return false;
         }
         $returnType = $method->getReturnType();
         if ($returnType && $returnType instanceof \ReflectionNamedType) {
             $returnTypeName = $returnType->getName();
             if ($returnTypeName === 'self' || $returnTypeName === 'static' || $returnTypeName === static::class) {
-                return new static($method->getName());
+                return true;
             }
         }
-        return null;
+        return false;
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Slepic\ValueObject\Strings;
 
-interface StringLengthExceptionInterface extends StringValueExceptionInterface
+interface StringLengthExceptionInterface extends StringExceptionInterface
 {
     public function getValueLength(): int;
 }

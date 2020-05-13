@@ -2,7 +2,7 @@
 
 namespace Slepic\ValueObject\Strings;
 
-class StringLengthException extends StringValueException implements StringLengthExceptionInterface
+class StringLengthException extends StringException implements StringLengthExceptionInterface
 {
     private int $valueLength;
 

@@ -7,7 +7,7 @@ INSTALL=composer install --no-interaction
 TEST=vendor/bin/phpunit --colors=always tests
 CSCHECK=vendor/bin/phpcs $(CS)
 CSFIX=vendor/bin/phpcbf $(CS)
-PSALM=vendor/bin/psalm
+PSALM=vendor/bin/psalm --show-info=true
 
 install:
 	$(DOCKER) $(INSTALL)

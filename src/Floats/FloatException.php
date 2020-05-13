@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Slepic\ValueObject\Strings;
+namespace Slepic\ValueObject\Floats;
 
 use Slepic\ValueObject\InvalidValueException;
 
-class StringValueException extends InvalidValueException implements StringValueExceptionInterface
+class FloatException extends InvalidValueException implements FloatExceptionInterface
 {
     public function __construct(
-        string $value,
+        float $value,
         ?string $expectation,
         string $message = "",
         int $code = 0,
@@ -16,7 +16,7 @@ class StringValueException extends InvalidValueException implements StringValueE
         parent::__construct($value, $expectation, $message, $code, $previous);
     }
 
-    public function getValue(): string
+    public function getValue(): float
     {
         return parent::getValue();
     }

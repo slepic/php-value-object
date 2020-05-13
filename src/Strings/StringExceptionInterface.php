@@ -4,7 +4,7 @@ namespace Slepic\ValueObject\Strings;
 
 use Slepic\ValueObject\InvalidValueExceptionInterface;
 
-interface StringValueExceptionInterface extends InvalidValueExceptionInterface
+interface StringExceptionInterface extends InvalidValueExceptionInterface
 {
     public function getValue(): string;
 }
