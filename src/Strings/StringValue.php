@@ -2,7 +2,7 @@
 
 namespace Slepic\ValueObject\Strings;
 
-class StringValue implements \JsonSerializable
+abstract class StringValue implements \JsonSerializable
 {
     private string $value;
 

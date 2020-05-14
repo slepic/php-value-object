@@ -4,6 +4,7 @@ namespace Slepic\ValueObject\Collections\Dictionaries;
 
 use Slepic\ValueObject\Collections\CollectionException;
 use Slepic\ValueObject\Collections\CollectionExceptionInterface;
+use Slepic\ValueObject\InvalidTypeException;
 use Slepic\ValueObject\InvalidValueException;
 use Slepic\ValueObject\InvalidValueExceptionInterface;
 
@@ -126,13 +127,15 @@ abstract class DataTransferObject
             $targetTypeName = 'double';
         }
         if ($targetTypeName !== \gettype($value)) {
-            throw new InvalidValueException($value, $targetTypeName);
+            throw new InvalidTypeException($value, $targetTypeName);
         }
         return $value;
     }
 
     /**
-     * @psalm-param class-string $targetTypeName
+     * @psalm-template T
+     * @psalm-param class-string<T> $targetTypeName
+     * @psalm-return T
      * @param string $targetTypeName
      * @param mixed $value
      * @return mixed

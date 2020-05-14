@@ -9,7 +9,7 @@ class IntegerTooBigException extends IntegerException implements IntegerTooBigEx
     public function __construct(
         int $upperBound,
         int $value,
-        ?string $expectation,
+        ?string $expectation = null,
         string $message = "",
         int $code = 0,
         \Throwable $previous = null
