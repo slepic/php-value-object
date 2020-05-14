@@ -3,6 +3,7 @@
 namespace Slepic\ValueObject\Collections\Dictionaries;
 
 use Slepic\ValueObject\Collections\CollectionException;
+use Slepic\ValueObject\Collections\CollectionExceptionInterface;
 use Slepic\ValueObject\InvalidValueException;
 use Slepic\ValueObject\InvalidValueExceptionInterface;
 
@@ -13,10 +14,24 @@ use Slepic\ValueObject\InvalidValueExceptionInterface;
  */
 abstract class DataTransferObject
 {
+    /**
+     * @param array $data
+     * @throws CollectionExceptionInterface
+     */
     public function __construct(array $data)
     {
+        try {
+            $reflection = new \ReflectionClass(static::class);
+        } catch (\ReflectionException $e) {
+            // this should never happen, but let's make IDE happy :)
+            throw new \RuntimeException(
+                'ReflectionClass failed for static::class',
+                0,
+                $e
+            );
+        }
+
         $errors = [];
-        $reflection = new \ReflectionClass(static::class);
         $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC);
         foreach ($properties as $property) {
             if ($property->isStatic()) {
@@ -32,6 +47,12 @@ abstract class DataTransferObject
                     $this->checkMissingProperty($property);
                 }
             } catch (InvalidValueExceptionInterface $e) {
+                /*
+                echo "got error for key '$key' and value:\n";
+                var_dump($e->getValue());
+                var_dump(\get_class($e));
+                var_dump($e->getMessage());
+                */
                 $errors[$key] = $e;
             }
         }
@@ -101,6 +122,8 @@ abstract class DataTransferObject
     {
         if ($targetTypeName === 'int') {
             $targetTypeName = 'integer';
+        } elseif ($targetTypeName === 'float') {
+            $targetTypeName = 'double';
         }
         if ($targetTypeName !== \gettype($value)) {
             throw new InvalidValueException($value, $targetTypeName);

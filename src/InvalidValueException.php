@@ -25,11 +25,16 @@ class InvalidValueException extends \InvalidArgumentException implements Invalid
         int $code = 0,
         \Throwable $previous = null
     ) {
+        if (\is_object($value) && !\method_exists($value, '__toString')) {
+            $serializedValue = 'object';
+        } else {
+            $serializedValue = (string) $value;
+        }
         if (!$message) {
             if ($expectation !== null) {
-                $message = "Expected $expectation got \"$value\".";
+                $message = "Expected $expectation got \"$serializedValue\".";
             } else {
-                $message = "\"$value\" not expected.";
+                $message = "\"$serializedValue\" not expected.";
             }
         }
         $this->value = $value;
