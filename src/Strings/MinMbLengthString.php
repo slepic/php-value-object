@@ -2,7 +2,7 @@
 
 namespace Slepic\ValueObject\Strings;
 
-abstract class MinMbLengthString extends StringValue
+abstract class MinMbLengthString extends MultiByteString
 {
     abstract protected static function minLength(): int;
 
@@ -13,6 +13,6 @@ abstract class MinMbLengthString extends StringValue
         if ($length < $minLength) {
             throw new StringTooShortException($minLength, $length, $value);
         }
-        parent::__construct($value);
+        parent::__construct($value, $length);
     }
 }

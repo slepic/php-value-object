@@ -20,4 +20,9 @@ abstract class StringValue implements \JsonSerializable
     {
         return $this->value;
     }
+
+    public function getLength(): int
+    {
+        return \strlen($this->value);
+    }
 }

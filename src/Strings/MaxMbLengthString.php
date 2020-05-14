@@ -2,7 +2,7 @@
 
 namespace Slepic\ValueObject\Strings;
 
-abstract class MaxMbLengthString extends StringValue
+abstract class MaxMbLengthString extends MultiByteString
 {
     abstract protected static function maxLength(): int;
 
@@ -13,6 +13,6 @@ abstract class MaxMbLengthString extends StringValue
         if ($length > $maxLength) {
             throw new StringTooLongException($maxLength, $length, $value);
         }
-        parent::__construct($value);
+        parent::__construct($value, $length);
     }
 }

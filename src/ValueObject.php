@@ -100,4 +100,37 @@ final class ValueObject
             throw new InvalidTypeException($value, $expectedType);
         }
     }
+
+
+    /**
+     * @psalm-param class-string $class
+     * @param string $class
+     * @param string $method
+     * @return callable
+     */
+    public static function forMethodReturnType(string $class, string $method): callable
+    {
+        try {
+            $method = new \ReflectionMethod($class, $method);
+        } catch (\ReflectionException $e) {
+            throw new \InvalidArgumentException($e->getMessage());
+        }
+
+        $targetType = $method->getReturnType();
+        if ($targetType === null) {
+            throw new \UnexpectedValueException('Method current does not have a return type.');
+        }
+
+        if (!$targetType instanceof \ReflectionNamedType) {
+            throw new \RuntimeException('ReflectionNamedType not supported.');
+        }
+
+        /**
+         * @psalm-suppress MissingClosureParamType
+         * @psalm-suppress MissingClosureReturnType
+         * @param mixed $value
+         * @return mixed
+         */
+        return fn ($value) => self::prepare($targetType, $value);
+    }
 }
