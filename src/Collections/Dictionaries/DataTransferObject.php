@@ -7,6 +7,8 @@ use Slepic\ValueObject\Collections\CollectionExceptionInterface;
 use Slepic\ValueObject\InvalidTypeException;
 use Slepic\ValueObject\InvalidValueException;
 use Slepic\ValueObject\InvalidValueExceptionInterface;
+use Slepic\ValueObject\TypeError;
+use Slepic\ValueObject\ValueObject;
 
 /**
  * Represents a dictionary with a fixed set of properties and their types.
@@ -79,6 +81,7 @@ abstract class DataTransferObject
      * @param \ReflectionProperty $property
      * @param mixed $value
      * @return mixed
+     * @throws InvalidValueExceptionInterface
      */
     private function prepareProvidedProperty(\ReflectionProperty $property, $value)
     {
@@ -95,56 +98,6 @@ abstract class DataTransferObject
             throw new \RuntimeException('ReflectionNamedType is not supported.');
         }
 
-        if ($value === null) {
-            $this->checkNullable($targetType);
-            return null;
-        } elseif ($targetType->isBuiltin()) {
-            /** @psalm-suppress ArgumentTypeCoercion */
-            return $this->prepareBuiltin($targetType->getName(), $value);
-        } else {
-            /** @psalm-suppress ArgumentTypeCoercion */
-            return $this->prepareObject($targetType->getName(), $value);
-        }
-    }
-
-    private function checkNullable(\ReflectionNamedType $targetType): void
-    {
-        if (!$targetType->allowsNull()) {
-            throw new InvalidValueException(null, 'not null', 'Value cannot be null');
-        }
-    }
-
-    /**
-     * @param string $targetTypeName
-     * @param mixed $value
-     * @return mixed
-     */
-    private function prepareBuiltin(string $targetTypeName, $value)
-    {
-        if ($targetTypeName === 'int') {
-            $targetTypeName = 'integer';
-        } elseif ($targetTypeName === 'float') {
-            $targetTypeName = 'double';
-        }
-        if ($targetTypeName !== \gettype($value)) {
-            throw new InvalidTypeException($value, $targetTypeName);
-        }
-        return $value;
-    }
-
-    /**
-     * @psalm-template T
-     * @psalm-param class-string<T> $targetTypeName
-     * @psalm-return T
-     * @param string $targetTypeName
-     * @param mixed $value
-     * @return mixed
-     */
-    private function prepareObject(string $targetTypeName, $value)
-    {
-        if (\method_exists($targetTypeName, 'fromMixed')) {
-            return $targetTypeName::fromMixed($value);
-        }
-        throw new InvalidValueException($value, 'something else');
+        return ValueObject::prepare($targetType, $value);
     }
 }
