@@ -14,7 +14,6 @@ class StringEnumException extends StringException implements StringEnumException
     /**
      * @param array<string> $allowedValues
      * @param string $value
-     * @param string|null $expectation
      * @param string $message
      * @param int $code
      * @param \Throwable|null $previous
@@ -22,13 +21,12 @@ class StringEnumException extends StringException implements StringEnumException
     public function __construct(
         array $allowedValues,
         string $value,
-        ?string $expectation,
         string $message = "",
         int $code = 0,
         \Throwable $previous = null
     ) {
         $this->allowedValues = $allowedValues;
-        parent::__construct($value, $expectation, $message, $code, $previous);
+        parent::__construct($value, $message, $code, $previous);
     }
 
     public function getAllowedValues(): array

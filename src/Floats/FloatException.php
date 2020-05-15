@@ -8,12 +8,11 @@ class FloatException extends InvalidValueException implements FloatExceptionInte
 {
     public function __construct(
         float $value,
-        ?string $expectation,
         string $message = "",
         int $code = 0,
         \Throwable $previous = null
     ) {
-        parent::__construct($value, $expectation, $message, $code, $previous);
+        parent::__construct($value, $message, $code, $previous);
     }
 
     public function getValue(): float

@@ -8,12 +8,11 @@ class IntegerException extends InvalidValueException implements IntegerException
 {
     public function __construct(
         int $value,
-        ?string $expectation,
         string $message = "",
         int $code = 0,
         \Throwable $previous = null
     ) {
-        parent::__construct($value, $expectation, $message, $code, $previous);
+        parent::__construct($value, $message, $code, $previous);
     }
 
     public function getValue(): int

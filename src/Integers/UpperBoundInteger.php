@@ -13,7 +13,6 @@ abstract class UpperBoundInteger extends IntegerValue
             throw new IntegerTooBigException(
                 $maxValue,
                 $value,
-                '<' . (string) $value,
                 'Expected at most ' . $maxValue
             );
         }

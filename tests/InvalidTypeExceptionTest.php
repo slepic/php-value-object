@@ -3,14 +3,17 @@
 namespace Slepic\Tests\ValueObject;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Util\Type;
 use Slepic\ValueObject\InvalidTypeException;
 use Slepic\ValueObject\InvalidTypeExceptionInterface;
+use Slepic\ValueObject\TypeExpectation;
+use Slepic\ValueObject\TypeExpectationInterface;
 
 final class InvalidTypeExceptionTest extends TestCase
 {
     /**
+     * @param TypeExpectationInterface $expectation
      * @param $value
-     * @param string|null $expectation
      * @param string $message
      * @param int $code
      * @param \Throwable|null $previous
@@ -19,49 +22,49 @@ final class InvalidTypeExceptionTest extends TestCase
      * @dataProvider provideConstructorTestData
      */
     public function testConstructor(
+        TypeExpectationInterface $expectation,
         $value,
-        ?string $expectation = null,
         string $message = '',
         int $code = 0,
         ?\Throwable $previous = null,
         array $messageSubstrings = []
     ): void {
-        $e = new InvalidTypeException($value, $expectation, $message, $code, $previous);
+        $e = new InvalidTypeException($expectation, $value, $message, $code, $previous);
 
         self::assertInstanceOf(InvalidTypeExceptionInterface::class, $e);
         InvalidValueExceptionAssertion::assert(
             $e,
             $value,
-            $expectation,
             $message,
             $code,
             $previous,
             $messageSubstrings
         );
+        self::assertSame($expectation, $e->getExpectation());
     }
 
     public function provideConstructorTestData(): array
     {
         return [
-            [1],
-            [''],
-            [10.0],
-            ['hello', 'exp', 'custom message'],
+            [new TypeExpectation('int'), 1],
+            [new TypeExpectation('string'), ''],
+            [new TypeExpectation('float'), 10.0],
+            [new TypeExpectation('string'), 'hello', 'custom message'],
             [
+                new TypeExpectation('string'),
                 'abscdef0123',
-                null,
                 '',
                 0,
                 new \Exception('test'),
                 ['"string" not expected']
             ],
             [
+                new TypeExpectation('string'),
                 'abscdef0123',
-                'gulligulli',
                 '',
                 15,
                 new \Exception('test'),
-                ['Expected "gulligulli"', 'got "string"']
+                ['"string" not expected']
             ],
         ];
     }

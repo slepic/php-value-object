@@ -9,13 +9,12 @@ class FloatTooSmallException extends FloatException implements FloatTooSmallExce
     public function __construct(
         float $lowerBound,
         float $value,
-        ?string $expectation,
         string $message = "",
         int $code = 0,
         \Throwable $previous = null
     ) {
         $this->lowerBound = $lowerBound;
-        parent::__construct($value, $expectation, $message, $code, $previous);
+        parent::__construct($value, $message, $code, $previous);
     }
 
     public function getLowerBound(): float

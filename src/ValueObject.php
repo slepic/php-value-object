@@ -70,7 +70,8 @@ final class ValueObject
     {
         if ($value === null) {
             if (!$targetType->allowsNull()) {
-                throw new InvalidValueException(null, 'not null', 'Value cannot be null');
+                $expectation = new TypeExpectation($targetType->getName());
+                throw new InvalidTypeException($expectation, $value);
             }
             return null;
         } elseif ($targetType->isBuiltin()) {
@@ -78,7 +79,6 @@ final class ValueObject
             return self::prepareValueForBuiltinType($targetType->getName(), $value);
         } else {
             /** @psalm-suppress ArgumentTypeCoercion */
-            //return self::prepareObject($targetType->getName(), $value);
             return self::prepareValueForObjectType($targetType->getName(), $value);
         }
     }
@@ -119,7 +119,7 @@ final class ValueObject
         if (\is_object($value) && \method_exists($value, '__toString')) {
             return (string) $value;
         }
-        throw new InvalidTypeException($value, 'string');
+        throw new InvalidTypeException(new TypeExpectation('string'), $value);
     }
 
     /**
@@ -136,7 +136,7 @@ final class ValueObject
             return $value->toInt();
         }
 
-        throw new InvalidTypeException($value, 'integer');
+        throw new InvalidTypeException(new TypeExpectation('int'), $value);
     }
 
     /**
@@ -153,7 +153,7 @@ final class ValueObject
             return $value->toFloat();
         }
 
-        throw new InvalidTypeException($value, 'number');
+        throw new InvalidTypeException(new TypeExpectation('number'), $value);
     }
 
     /**
@@ -170,7 +170,7 @@ final class ValueObject
             return $value->toArray();
         }
 
-        throw new InvalidTypeException($value, 'array');
+        throw new InvalidTypeException(new TypeExpectation('array'), $value);
     }
 
     /**
@@ -187,7 +187,7 @@ final class ValueObject
             return $value->toBool();
         }
 
-        throw new InvalidTypeException($value, 'boolean');
+        throw new InvalidTypeException(new TypeExpectation('bool'), $value);
     }
 
     /**
@@ -262,6 +262,7 @@ final class ValueObject
             throw new \Exception("Target type \"$class\" has no input type expectation.");
         }
 
-        throw new InvalidTypeException($value, \implode('|', $expectedTypes));
+        $expectation = new TypeExpectation(\implode('|', $expectedTypes));
+        throw new InvalidTypeException($expectation, $value);
     }
 }

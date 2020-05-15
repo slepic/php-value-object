@@ -10,14 +10,13 @@ class StringTooShortException extends StringLengthException implements StringToo
         int $minLength,
         int $valueLength,
         string $value,
-        ?string $expectation = null,
         string $message = "",
         int $code = 0,
         \Throwable $previous = null
     ) {
         $message = $message ?: "Value must be at least $minLength characters long. Got $valueLength.";
         $this->minLength = $minLength;
-        parent::__construct($valueLength, $value, $expectation, $message, $code, $previous);
+        parent::__construct($valueLength, $value, $message, $code, $previous);
     }
 
     final public function getMinLength(): int

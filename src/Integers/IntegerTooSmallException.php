@@ -9,13 +9,12 @@ class IntegerTooSmallException extends IntegerException implements IntegerTooSma
     public function __construct(
         int $lowerBound,
         int $value,
-        ?string $expectation = null,
         string $message = "",
         int $code = 0,
         \Throwable $previous = null
     ) {
         $this->lowerBound = $lowerBound;
-        parent::__construct($value, $expectation, $message, $code, $previous);
+        parent::__construct($value, $message, $code, $previous);
     }
 
     public function getLowerBound(): int

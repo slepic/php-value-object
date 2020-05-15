@@ -9,14 +9,13 @@ class StringLengthException extends StringException implements StringLengthExcep
     public function __construct(
         int $valueLength,
         string $value,
-        ?string $expectation,
         string $message = "",
         int $code = 0,
         \Throwable $previous = null
     ) {
         $message = $message ?: "Value has unexpected length of $valueLength.";
         $this->valueLength = $valueLength;
-        parent::__construct($value, $expectation, $message, $code, $previous);
+        parent::__construct($value, $message, $code, $previous);
     }
 
     final public function getValueLength(): int

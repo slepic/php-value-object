@@ -13,7 +13,6 @@ abstract class LowerBoundInteger extends IntegerValue
             throw new IntegerTooSmallException(
                 $minValue,
                 $value,
-                '>' . $value,
                 'Expected at least ' . $minValue
             );
         }

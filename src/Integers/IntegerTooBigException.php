@@ -9,13 +9,12 @@ class IntegerTooBigException extends IntegerException implements IntegerTooBigEx
     public function __construct(
         int $upperBound,
         int $value,
-        ?string $expectation = null,
         string $message = "",
         int $code = 0,
         \Throwable $previous = null
     ) {
         $this->upperBound = $upperBound;
-        parent::__construct($value, $expectation, $message, $code, $previous);
+        parent::__construct($value, $message, $code, $previous);
     }
 
     public function getUpperBound(): int

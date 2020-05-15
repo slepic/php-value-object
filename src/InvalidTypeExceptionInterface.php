@@ -4,5 +4,5 @@ namespace Slepic\ValueObject;
 
 interface InvalidTypeExceptionInterface extends InvalidValueExceptionInterface
 {
-
+    public function getExpectation(): TypeExpectationInterface;
 }

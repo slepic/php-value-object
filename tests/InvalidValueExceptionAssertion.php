@@ -10,14 +10,12 @@ class InvalidValueExceptionAssertion
     public static function assert(
         InvalidValueExceptionInterface $e,
         $value,
-        ?string $expectation = null,
         string $message = '',
         int $code = 0,
         ?\Throwable $previous = null,
         array $messageSubstrings = []
     ): void {
         TestCase::assertSame($value, $e->getValue());
-        TestCase::assertSame($expectation, $e->getExpectation());
         TestCase::assertSame($code, $e->getCode());
         TestCase::assertSame($previous, $e->getPrevious());
         if ($message) {

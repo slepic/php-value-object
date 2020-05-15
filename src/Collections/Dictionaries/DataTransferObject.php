@@ -44,7 +44,7 @@ abstract class DataTransferObject
                     $this->$key = ValueObject::prepareForProperty($property, $data[$key]);
                 } else {
                     if (!$property->isInitialized($this)) {
-                        throw new InvalidValueException(null, 'any', 'Value is required.');
+                        throw new InvalidValueException(null, 'Value is required.');
                     }
                 }
             } catch (InvalidValueExceptionInterface $e) {
@@ -53,13 +53,15 @@ abstract class DataTransferObject
                 var_dump($e->getValue());
                 var_dump(\get_class($e));
                 var_dump($e->getMessage());
+                var_dump($e->getExpectation());
+                throw $e;
                 */
                 $errors[$key] = $e;
             }
         }
 
         if (\count($errors) !== 0) {
-            throw new CollectionException($errors, $data, 'object', 'The object has invalid or missing properties.');
+            throw new CollectionException($errors, $data, 'The object has invalid or missing properties.');
         }
 
         // @todo excess properties??

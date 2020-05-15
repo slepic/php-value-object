@@ -9,6 +9,7 @@ use Slepic\Tests\ValueObject\Collections\Dictionaries\DataTransferObject\Nullabl
 use Slepic\Tests\ValueObject\Collections\Dictionaries\DataTransferObject\RequiredIntFixture;
 use Slepic\ValueObject\Collections\CollectionExceptionInterface;
 use Slepic\ValueObject\Collections\Dictionaries\DataTransferObject;
+use Slepic\ValueObject\Email\EmailAddress;
 use Slepic\ValueObject\InvalidValueExceptionInterface;
 
 class DataTransferObjectTest extends TestCase

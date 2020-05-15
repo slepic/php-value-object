@@ -6,6 +6,7 @@ use Slepic\ValueObject\Collections\CollectionException;
 use Slepic\ValueObject\Collections\ImmutableArrayIterator;
 use Slepic\ValueObject\InvalidTypeException;
 use Slepic\ValueObject\InvalidValueExceptionInterface;
+use Slepic\ValueObject\TypeExpectation;
 use Slepic\ValueObject\ValueObject;
 
 /**
@@ -24,7 +25,7 @@ abstract class ArrayList extends ImmutableArrayIterator implements \JsonSerializ
         $errors = [];
         foreach ($value as $key => $item) {
             if ($key !== $index) {
-                throw new InvalidTypeException($value, 'array');
+                throw new InvalidTypeException(new TypeExpectation('array'), $value);
             }
 
             try {

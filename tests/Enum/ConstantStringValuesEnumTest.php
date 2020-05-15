@@ -58,8 +58,6 @@ final class ConstantStringValuesEnumTest extends TestCase
             self::assertTrue(false, 'StringValueExceptionInterface not thrown');
         } catch (StringExceptionInterface $e) {
             self::assertSame('invalid', $e->getValue());
-            self::assertStringContainsString('value1', $e->getExpectation());
-            self::assertStringContainsString('value2', $e->getExpectation());
         }
     }
 }

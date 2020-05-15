@@ -11,13 +11,12 @@ class CollectionException extends InvalidValueException implements CollectionExc
     public function __construct(
         array $errors,
         array $value,
-        ?string $expectation = null,
         string $message = "",
         int $code = 0,
         \Throwable $previous = null
     ) {
         $this->errors = $errors;
-        parent::__construct($value, $expectation, $message, $code, $previous);
+        parent::__construct($value, $message, $code, $previous);
     }
 
     public function getValue(): array
