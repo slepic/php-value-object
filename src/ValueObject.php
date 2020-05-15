@@ -75,76 +75,193 @@ final class ValueObject
             return null;
         } elseif ($targetType->isBuiltin()) {
             /** @psalm-suppress ArgumentTypeCoercion */
-            return self::prepareBuiltin($targetType->getName(), $value);
+            return self::prepareValueForBuiltinType($targetType->getName(), $value);
         } else {
             /** @psalm-suppress ArgumentTypeCoercion */
-            return self::prepareObject($targetType->getName(), $value);
+            //return self::prepareObject($targetType->getName(), $value);
+            return self::prepareValueForObjectType($targetType->getName(), $value);
         }
     }
 
     /**
-     * @param string $targetTypeName
+     * @param string $targetType
      * @param mixed $value
-     * @return mixed
-     * @throws InvalidValueExceptionInterface
+     * @return array|float|int|string|bool
+     * @throws InvalidTypeException
      */
-    private static function prepareBuiltin(string $targetTypeName, $value)
+    private static function prepareValueForBuiltinType(string $targetType, $value)
     {
-        if ($targetTypeName === 'int') {
-            $targetTypeName = 'integer';
-        } elseif ($targetTypeName === 'float') {
-            $targetTypeName = 'double';
+        switch ($targetType) {
+            case 'string':
+                return self::toString($value);
+            case 'int':
+                return self::toInt($value);
+            case 'float':
+                return self::toFloat($value);
+            case 'array':
+                return self::toArray($value);
+            case 'bool':
+                return self::toBool($value);
+            default:
+                throw new \InvalidArgumentException('Only string|int|float|array are supported builtin types.');
         }
-        if ($targetTypeName !== \gettype($value)) {
-            throw new InvalidTypeException($value, $targetTypeName);
+    }
+
+    /**
+     * @param mixed $value
+     * @return string
+     */
+    private static function toString($value): string
+    {
+        if (\is_string($value)) {
+            return $value;
         }
-        return $value;
+        if (\is_object($value) && \method_exists($value, '__toString')) {
+            return (string) $value;
+        }
+        throw new InvalidTypeException($value, 'string');
+    }
+
+    /**
+     * @param mixed $value
+     * @return int
+     */
+    private static function toInt($value): int
+    {
+        if (\is_int($value)) {
+            return $value;
+        }
+
+        if (\is_object($value) && $value instanceof ToIntConvertibleInterface) {
+            return $value->toInt();
+        }
+
+        throw new InvalidTypeException($value, 'integer');
+    }
+
+    /**
+     * @param mixed $value
+     * @return float
+     */
+    private static function toFloat($value): float
+    {
+        if (\is_float($value)) {
+            return $value;
+        }
+
+        if (\is_object($value) && $value instanceof ToFloatConvertibleInterface) {
+            return $value->toFloat();
+        }
+
+        throw new InvalidTypeException($value, 'number');
+    }
+
+    /**
+     * @param mixed $value
+     * @return array
+     */
+    private static function toArray($value): array
+    {
+        if (\is_array($value)) {
+            return $value;
+        }
+
+        if (\is_object($value) && $value instanceof ToArrayConvertibleInterface) {
+            return $value->toArray();
+        }
+
+        throw new InvalidTypeException($value, 'array');
+    }
+
+    /**
+     * @param mixed $value
+     * @return bool
+     */
+    private static function toBool($value): bool
+    {
+        if (\is_bool($value)) {
+            return $value;
+        }
+
+        if (\is_object($value) && $value instanceof ToBoolConvertibleInterface) {
+            return $value->toBool();
+        }
+
+        throw new InvalidTypeException($value, 'boolean');
     }
 
     /**
      * @psalm-template T
-     * @psalm-param class-string<T> $targetTypeName
+     * @psalm-param class-string<T> $class
      * @psalm-return T
-     * @param string $targetTypeName
+     * @param string $class
      * @param mixed $value
-     * @return object
-     * @throws InvalidValueExceptionInterface
-     *
-     * @todo check named constructors
+     * @return mixed
      */
-    private static function prepareObject(string $targetTypeName, $value)
+    private static function prepareValueForObjectType(string $class, $value)
     {
         try {
-            $targetTypeReflection = new \ReflectionClass($targetTypeName);
+            $targetTypeReflection = new \ReflectionClass($class);
         } catch (\ReflectionException $e) {
             throw new \InvalidArgumentException('Non object type or unknown type passed.');
         }
-        if (!$targetTypeReflection->isInstantiable()) {
-            throw new \InvalidArgumentException('Class is not instantiable.');
+
+        if (\is_string($value)) {
+            if ($targetTypeReflection->implementsInterface(FromStringConstructableInterface::class)) {
+                return $targetTypeReflection->getMethod('fromString')->invoke(null, $value);
+            }
+        } elseif (\is_int($value)) {
+            if ($targetTypeReflection->implementsInterface(FromIntConstructableInterface::class)) {
+                return $targetTypeReflection->getMethod('fromInt')->invoke(null, $value);
+            }
+        } elseif (\is_float($value)) {
+            if ($targetTypeReflection->implementsInterface(FromFloatConstructableInterface::class)) {
+                return $targetTypeReflection->getMethod('fromFloat')->invoke(null, $value);
+            }
+        } elseif (\is_array($value)) {
+            if ($targetTypeReflection->implementsInterface(FromArrayConstructableInterface::class)) {
+                return $targetTypeReflection->getMethod('fromArray')->invoke(null, $value);
+            }
+        } elseif (\is_bool($value)) {
+            if ($targetTypeReflection->implementsInterface(FromBoolConstructableInterface::class)) {
+                return $targetTypeReflection->getMethod('fromArray')->invoke(null, $value);
+            }
+        } elseif (\is_object($value)) {
+            if ($targetTypeReflection->implementsInterface(FromObjectConstructableInterface::class)) {
+                return $targetTypeReflection->getMethod('fromObject')->invoke(null, $value);
+            }
+
+            if (\is_a($value, $class)) {
+                return $value;
+            }
+        } elseif ($targetTypeReflection->implementsInterface(FromAnyConstructableInterface::class)) {
+            return $targetTypeReflection->getMethod('fromAny')->invoke(null, $value);
         }
 
-        $constructor = $targetTypeReflection->getConstructor();
-        if ($constructor === null) {
-            throw new \InvalidArgumentException('There is no constructor');
+        $expectedTypes = [];
+        if ($targetTypeReflection->implementsInterface(FromStringConstructableInterface::class)) {
+            $expectedTypes[] = 'string';
+        }
+        if ($targetTypeReflection->implementsInterface(FromIntConstructableInterface::class)) {
+            $expectedTypes[] = 'int';
+        }
+        if ($targetTypeReflection->implementsInterface(FromFloatConstructableInterface::class)) {
+            $expectedTypes[] = 'float';
+        }
+        if ($targetTypeReflection->implementsInterface(FromBoolConstructableInterface::class)) {
+            $expectedTypes[] = 'boolean';
+        }
+        if ($targetTypeReflection->implementsInterface(FromArrayConstructableInterface::class)) {
+            $expectedTypes[] = 'array';
+        }
+        if ($targetTypeReflection->implementsInterface(FromObjectConstructableInterface::class)) {
+            $expectedTypes[] = 'object';
         }
 
-        if (!$constructor->isPublic()) {
-            throw new \InvalidArgumentException('Cannot use constructor, not public');
+        if (\count($expectedTypes) === 0) {
+            throw new \Exception("Target type \"$class\" has no input type expectation.");
         }
 
-        if ($constructor->getNumberOfRequiredParameters() > 1) {
-            throw new \InvalidArgumentException('Class must have at most 1 required constructor parameter.');
-        }
-
-        if ($constructor->getNumberOfParameters() === 0) {
-            throw new \InvalidArgumentException('Class must have at least one constructor parameter.');
-        }
-
-        try {
-            return $targetTypeReflection->newInstance($value);
-        } catch (\TypeError $e) {
-            $expectedType = TypeError::getExpectedType($e);
-            throw new InvalidTypeException($value, $expectedType);
-        }
+        throw new InvalidTypeException($value, \implode('|', $expectedTypes));
     }
 }
