@@ -2,8 +2,6 @@
 
 namespace Slepic\ValueObject\Collections;
 
-use http\Exception\BadMethodCallException;
-
 class ImmutableArrayIterator implements \Iterator, \Countable, \ArrayAccess
 {
     private \ArrayIterator $items;
