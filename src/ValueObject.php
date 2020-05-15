@@ -5,15 +5,73 @@ namespace Slepic\ValueObject;
 final class ValueObject
 {
     /**
+     * @param \ReflectionProperty $property
+     * @param mixed $value
+     * @return mixed
+     * @throws InvalidValueExceptionInterface
+     */
+    public static function prepareForProperty(\ReflectionProperty $property, $value)
+    {
+        $key = $property->getName();
+
+        if (!$property->hasType()) {
+            throw new \RuntimeException(
+                "Property $key is missing type hint."
+            );
+        }
+
+        $targetType = $property->getType();
+        if (!$targetType instanceof \ReflectionNamedType) {
+            throw new \RuntimeException('ReflectionNamedType is not supported.');
+        }
+
+        return self::prepareForType($targetType, $value);
+    }
+
+    /**
+     * @psalm-param class-string $class
+     * @param string $class
+     * @param string $method
+     * @return callable
+     */
+    public static function factoryForMethodReturnType(string $class, string $method): callable
+    {
+        try {
+            $method = new \ReflectionMethod($class, $method);
+        } catch (\ReflectionException $e) {
+            throw new \InvalidArgumentException($e->getMessage());
+        }
+
+        $targetType = $method->getReturnType();
+        if ($targetType === null) {
+            throw new \UnexpectedValueException('Method current does not have a return type.');
+        }
+
+        if (!$targetType instanceof \ReflectionNamedType) {
+            throw new \RuntimeException('ReflectionNamedType not supported.');
+        }
+
+        /**
+         * @psalm-suppress MissingClosureParamType
+         * @psalm-suppress MissingClosureReturnType
+         * @param mixed $value
+         * @return mixed
+         */
+        return fn ($value) => self::prepareForType($targetType, $value);
+    }
+
+    /**
      * @param \ReflectionNamedType $targetType
      * @param mixed $value
      * @return mixed
      * @throws InvalidValueExceptionInterface
      */
-    public static function prepare(\ReflectionNamedType $targetType, $value)
+    private static function prepareForType(\ReflectionNamedType $targetType, $value)
     {
         if ($value === null) {
-            self::checkNullable($targetType);
+            if (!$targetType->allowsNull()) {
+                throw new InvalidValueException(null, 'not null', 'Value cannot be null');
+            }
             return null;
         } elseif ($targetType->isBuiltin()) {
             /** @psalm-suppress ArgumentTypeCoercion */
@@ -21,17 +79,6 @@ final class ValueObject
         } else {
             /** @psalm-suppress ArgumentTypeCoercion */
             return self::prepareObject($targetType->getName(), $value);
-        }
-    }
-
-    /**
-     * @param \ReflectionNamedType $targetType
-     * @throws InvalidValueExceptionInterface
-     */
-    private static function checkNullable(\ReflectionNamedType $targetType): void
-    {
-        if (!$targetType->allowsNull()) {
-            throw new InvalidValueException(null, 'not null', 'Value cannot be null');
         }
     }
 
@@ -99,38 +146,5 @@ final class ValueObject
             $expectedType = TypeError::getExpectedType($e);
             throw new InvalidTypeException($value, $expectedType);
         }
-    }
-
-
-    /**
-     * @psalm-param class-string $class
-     * @param string $class
-     * @param string $method
-     * @return callable
-     */
-    public static function forMethodReturnType(string $class, string $method): callable
-    {
-        try {
-            $method = new \ReflectionMethod($class, $method);
-        } catch (\ReflectionException $e) {
-            throw new \InvalidArgumentException($e->getMessage());
-        }
-
-        $targetType = $method->getReturnType();
-        if ($targetType === null) {
-            throw new \UnexpectedValueException('Method current does not have a return type.');
-        }
-
-        if (!$targetType instanceof \ReflectionNamedType) {
-            throw new \RuntimeException('ReflectionNamedType not supported.');
-        }
-
-        /**
-         * @psalm-suppress MissingClosureParamType
-         * @psalm-suppress MissingClosureReturnType
-         * @param mixed $value
-         * @return mixed
-         */
-        return fn ($value) => self::prepare($targetType, $value);
     }
 }

@@ -11,7 +11,7 @@ abstract class ArrayMap extends ImmutableArrayIterator implements \JsonSerializa
 {
     public function __construct(array $value)
     {
-        $filter = ValueObject::forMethodReturnType(static::class, 'current');
+        $filter = ValueObject::factoryForMethodReturnType(static::class, 'current');
         $items = [];
         $errors = [];
 

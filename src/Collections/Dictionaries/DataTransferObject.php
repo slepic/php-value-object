@@ -4,21 +4,17 @@ namespace Slepic\ValueObject\Collections\Dictionaries;
 
 use Slepic\ValueObject\Collections\CollectionException;
 use Slepic\ValueObject\Collections\CollectionExceptionInterface;
-use Slepic\ValueObject\InvalidTypeException;
 use Slepic\ValueObject\InvalidValueException;
 use Slepic\ValueObject\InvalidValueExceptionInterface;
-use Slepic\ValueObject\TypeError;
 use Slepic\ValueObject\ValueObject;
 
 /**
  * Represents a dictionary with a fixed set of properties and their types.
- *
- * @todo
  */
 abstract class DataTransferObject
 {
     /**
-     * @param array $data
+     * @param array<string, mixed> $data
      * @throws CollectionExceptionInterface
      */
     public function __construct(array $data)
@@ -45,9 +41,11 @@ abstract class DataTransferObject
 
             try {
                 if (\array_key_exists($key, $data)) {
-                    $this->$key = $this->prepareProvidedProperty($property, $data[$key]);
+                    $this->$key = ValueObject::prepareForProperty($property, $data[$key]);
                 } else {
-                    $this->checkMissingProperty($property);
+                    if (!$property->isInitialized($this)) {
+                        throw new InvalidValueException(null, 'any', 'Value is required.');
+                    }
                 }
             } catch (InvalidValueExceptionInterface $e) {
                 /*
@@ -63,41 +61,12 @@ abstract class DataTransferObject
         if (\count($errors) !== 0) {
             throw new CollectionException($errors, $data, 'object', 'The object has invalid or missing properties.');
         }
+
+        // @todo excess properties??
     }
 
     public function toArray(): array
     {
         return \get_object_vars($this);
-    }
-
-    private function checkMissingProperty(\ReflectionProperty $property): void
-    {
-        if (!$property->isInitialized($this)) {
-            throw new InvalidValueException(null, 'any', 'Value is required.');
-        }
-    }
-
-    /**
-     * @param \ReflectionProperty $property
-     * @param mixed $value
-     * @return mixed
-     * @throws InvalidValueExceptionInterface
-     */
-    private function prepareProvidedProperty(\ReflectionProperty $property, $value)
-    {
-        $key = $property->getName();
-
-        if (!$property->hasType()) {
-            throw new \RuntimeException(
-                "Property $key is missing type hint."
-            );
-        }
-
-        $targetType = $property->getType();
-        if (!$targetType instanceof \ReflectionNamedType) {
-            throw new \RuntimeException('ReflectionNamedType is not supported.');
-        }
-
-        return ValueObject::prepare($targetType, $value);
     }
 }

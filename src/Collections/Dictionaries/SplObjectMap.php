@@ -22,8 +22,8 @@ abstract class SplObjectMap extends ImmutableArrayIterator implements \JsonSeria
      */
     public function __construct(array $value)
     {
-        $keyFilter = ValueObject::forMethodReturnType(static::class, 'currentKey');
-        $itemFilter = ValueObject::forMethodReturnType(static::class, 'currentValue');
+        $keyFilter = ValueObject::factoryForMethodReturnType(static::class, 'currentKey');
+        $itemFilter = ValueObject::factoryForMethodReturnType(static::class, 'currentValue');
 
         $storage = new \SplObjectStorage();
         $raw = [];

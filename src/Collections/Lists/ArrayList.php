@@ -17,7 +17,7 @@ abstract class ArrayList extends ImmutableArrayIterator implements \JsonSerializ
 {
     public function __construct(array $value)
     {
-        $filter = ValueObject::forMethodReturnType(static::class, 'current');
+        $filter = ValueObject::factoryForMethodReturnType(static::class, 'current');
 
         $index = 0;
         $items = [];
