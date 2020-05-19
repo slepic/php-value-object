@@ -13,11 +13,11 @@ use Slepic\ValueObject\Type\TypeInterface;
 
 final class Type
 {
-    public const PHP_STRING = 'string';
-    public const PHP_INT = 'int';
-    public const PHP_FLOAT = 'float';
-    public const PHP_BOOL = 'bool';
-    public const PHP_ARRAY = 'array';
+    private const PHP_STRING = 'string';
+    private const PHP_INT = 'int';
+    private const PHP_FLOAT = 'float';
+    private const PHP_BOOL = 'bool';
+    private const PHP_ARRAY = 'array';
 
     private function __construct()
     {
@@ -29,8 +29,7 @@ final class Type
             $type = self::forBuiltinType($reflectionType->getName());
         } else {
             /** @psalm-suppress ArgumentTypeCoercion */
-            $reflection = new \ReflectionClass($reflectionType->getName());
-            $type = self::forClassReflection($reflection);
+            $type = self::forClass($reflectionType->getName());
         }
 
         if ($reflectionType->allowsNull()) {
@@ -40,7 +39,18 @@ final class Type
         return $type;
     }
 
-    private static function forBuiltinType(string $name): TypeInterface
+    /**
+     * @psalm-param class-string $class
+     * @param string $class
+     * @return TypeInterface
+     */
+    public static function forClass(string $class): TypeInterface
+    {
+        $reflection = new \ReflectionClass($class);
+        return self::forClassReflection($reflection);
+    }
+
+    public static function forBuiltinType(string $name): TypeInterface
     {
         switch ($name) {
             case self::PHP_STRING:

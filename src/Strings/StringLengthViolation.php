@@ -2,9 +2,7 @@
 
 namespace Slepic\ValueObject\Strings;
 
-use Slepic\ValueObject\ViolationInterface;
-
-class StringLengthViolation implements ViolationInterface
+class StringLengthViolation implements StringViolationInterface
 {
     private int $length;
 

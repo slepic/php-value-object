@@ -4,9 +4,8 @@ namespace Slepic\ValueObject\Floats;
 
 use Slepic\ValueObject\ViolationException;
 use Slepic\ValueObject\ViolationExceptionInterface;
-use Slepic\ValueObject\ViolationInterface;
 
-final class FloatTooBig implements ViolationInterface
+final class FloatTooBig implements FloatViolationInterface
 {
     private float $upperBound;
 

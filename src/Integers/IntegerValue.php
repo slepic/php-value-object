@@ -2,7 +2,9 @@
 
 namespace Slepic\ValueObject\Integers;
 
-class IntegerValue implements \JsonSerializable
+use Slepic\ValueObject\Type\Downcasting\ToIntConvertibleInterface;
+
+class IntegerValue implements \JsonSerializable, ToIntConvertibleInterface
 {
     private int $value;
 

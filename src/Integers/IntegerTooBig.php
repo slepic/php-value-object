@@ -4,9 +4,8 @@ namespace Slepic\ValueObject\Integers;
 
 use Slepic\ValueObject\ViolationException;
 use Slepic\ValueObject\ViolationExceptionInterface;
-use Slepic\ValueObject\ViolationInterface;
 
-final class IntegerTooBig implements ViolationInterface
+final class IntegerTooBig implements IntegerViolationInterface
 {
     private int $upperBound;
 

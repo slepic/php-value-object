@@ -4,9 +4,8 @@ namespace Slepic\ValueObject\Enum;
 
 use Slepic\ValueObject\ViolationException;
 use Slepic\ValueObject\ViolationExceptionInterface;
-use Slepic\ValueObject\ViolationInterface;
 
-final class StringEnumViolation implements ViolationInterface
+final class StringEnumViolation implements StringEnumViolationInterface
 {
     /**
      * @var array<string>

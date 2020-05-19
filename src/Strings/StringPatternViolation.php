@@ -4,9 +4,8 @@ namespace Slepic\ValueObject\Strings;
 
 use Slepic\ValueObject\ViolationException;
 use Slepic\ValueObject\ViolationExceptionInterface;
-use Slepic\ValueObject\ViolationInterface;
 
-final class StringPatternViolation implements ViolationInterface
+final class StringPatternViolation implements StringViolationInterface
 {
     private string $pattern;
 

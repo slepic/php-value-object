@@ -4,9 +4,8 @@ namespace Slepic\ValueObject\Integers;
 
 use Slepic\ValueObject\ViolationException;
 use Slepic\ValueObject\ViolationExceptionInterface;
-use Slepic\ValueObject\ViolationInterface;
 
-final class IntegerOutOfBounds implements ViolationInterface
+final class IntegerOutOfBounds implements IntegerViolationInterface
 {
     private int $minValue;
     private int $maxValue;

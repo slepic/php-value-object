@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Slepic\ValueObject\Email;
+namespace Slepic\ValueObject\Standard\Email;
 
 use Slepic\ValueObject\Strings\StringValue;
 
