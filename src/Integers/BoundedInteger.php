@@ -11,15 +11,9 @@ abstract class BoundedInteger extends IntegerValue
     {
         $minValue = static::minValue();
         $maxValue = static::maxValue();
-        if ($maxValue < $minValue) {
-            throw new \UnexpectedValueException('Max value is less then min value.');
-        }
 
-        if ($value > $minValue) {
-            throw new IntegerTooSmallException($minValue, $value);
-        }
-        if ($value > $maxValue) {
-            throw new IntegerTooBigException($maxValue, $value);
+        if ($value < $minValue || $value > $maxValue) {
+            throw IntegerOutOfBounds::exception($minValue, $maxValue);
         }
 
         parent::__construct($value);

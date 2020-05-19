@@ -34,7 +34,6 @@ abstract class StringEnumBase extends StringValue
     /**
      * @param string $value
      * @return static
-     * @throws StringEnumExceptionInterface
      */
     final public static function fromString(string $value): self
     {
@@ -42,24 +41,7 @@ abstract class StringEnumBase extends StringValue
         if (isset($all[$value])) {
             return $all[$value];
         }
-        throw static::createInvalidValueException($value, $all);
-    }
-
-    /**
-     * @param string $value
-     * @param array<string, static> $allowed
-     * @return StringEnumExceptionInterface
-     */
-    protected static function createInvalidValueException(string $value, array $allowed): StringEnumExceptionInterface
-    {
-        return new StringEnumException(
-            \array_keys($allowed),
-            $value,
-            \sprintf(
-                'one of %s',
-                \implode('|', \array_map(fn($v) => (string) $v, $allowed))
-            ),
-        );
+        throw StringEnumViolation::exception(\array_keys($all));
     }
 
     /**

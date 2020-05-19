@@ -7,10 +7,10 @@ use Slepic\Tests\ValueObject\Collections\Dictionaries\DataTransferObject\Nullabl
 use Slepic\Tests\ValueObject\Collections\Dictionaries\DataTransferObject\NullableIntDefaultNullFixture;
 use Slepic\Tests\ValueObject\Collections\Dictionaries\DataTransferObject\NullableIntFixture;
 use Slepic\Tests\ValueObject\Collections\Dictionaries\DataTransferObject\RequiredIntFixture;
-use Slepic\ValueObject\Collections\CollectionExceptionInterface;
+use Slepic\ValueObject\Collections\CollectionViolation;
 use Slepic\ValueObject\Collections\Dictionaries\DataTransferObject;
-use Slepic\ValueObject\Email\EmailAddress;
-use Slepic\ValueObject\InvalidValueExceptionInterface;
+use Slepic\ValueObject\ErrorInterface;
+use Slepic\ValueObject\ViolationExceptionInterface;
 
 class DataTransferObjectTest extends TestCase
 {
@@ -29,6 +29,7 @@ class DataTransferObjectTest extends TestCase
      * @dataProvider provideConstructorData
      */
     public function testConstructor(
+        string $name,
         array $input,
         callable $factory,
         ?callable $then = null,
@@ -42,22 +43,29 @@ class DataTransferObjectTest extends TestCase
         try {
             /** @var DataTransferObject $dto */
             $dto = $factory($input);
-        } catch (CollectionExceptionInterface $e) {
+        } catch (ViolationExceptionInterface $e) {
             if ($errorAssertions) {
-                self::assertSame($input, $e->getValue());
-                $errors = $e->getErrors();
-                self::assertCount(\count($errorAssertions), $errors);
+                $violations = $e->getViolations();
+                self::assertCount(\count($errorAssertions), $violations);
+                $collectionErrors = [];
+                foreach ($violations as $violation) {
+                    if ($violation instanceof CollectionViolation) {
+                        $collectionErrors[$violation->getKey()] = $violation->getError();
+                    }
+                }
+                self::assertCount(\count($errorAssertions), $collectionErrors);
                 foreach ($errorAssertions as $key => $errorAssertion) {
-                    self::assertArrayHasKey($key, $errors);
-                    $errorAssertion($errors[$key]);
+                    self::assertArrayHasKey($key, $collectionErrors);
+                    $errorAssertion($collectionErrors[$key]);
                 }
                 return;
             }
+            print_r($e->getViolations());
             throw $e;
         }
 
         if ($errorAssertions) {
-            self::assertTrue(false, 'CollectionExceptionInterface not thrown.');
+            self::assertTrue(false, ViolationExceptionInterface::class . ' not thrown.');
             return;
         }
 
@@ -89,48 +97,54 @@ class DataTransferObjectTest extends TestCase
              */
 
             [
+                'none => required int => error',
                 [],
                 fn(array $value) => new RequiredIntFixture($value),
                 null,
                 [
-                    'xyz' => fn (InvalidValueExceptionInterface $e) => null,
+                    'xyz' => fn (ErrorInterface $e) => null,
                 ]
             ],
             [
+                '10 => required int => ok',
                 ['xyz' => 10],
                 fn(array $value) => new RequiredIntFixture($value),
                 fn(RequiredIntFixture $dto, array $input) => self::assertInputIsCopied($dto, $input)
             ],
             [
+                'string => required int => error',
                 ['xyz' => 'string value'],
                 fn(array $value) => new RequiredIntFixture($value),
                 null,
                 [
-                    'xyz' => fn (InvalidValueExceptionInterface $e) => null,
+                    'xyz' => fn (ErrorInterface $e) => null,
                 ]
             ],
                 [
+                'float => required int => error',
                 ['xyz' => 10.0],
                 fn($value) => new RequiredIntFixture($value),
                 null,
                 [
-                    'xyz' => fn (InvalidValueExceptionInterface $e) => null,
+                    'xyz' => fn (ErrorInterface $e) => null,
                 ]
             ],
                 [
+                'array => required int => error',
                 ['xyz' => []],
                 fn($value) => new RequiredIntFixture($value),
                 null,
                 [
-                    'xyz' => fn (InvalidValueExceptionInterface $e) => null,
+                    'xyz' => fn (ErrorInterface $e) => null,
                 ]
             ],
                 [
+                'object => required int => error',
                 ['xyz' => (object) []],
                 fn($value) => new RequiredIntFixture($value),
                 null,
                 [
-                    'xyz' => fn (InvalidValueExceptionInterface $e) => null,
+                    'xyz' => fn (ErrorInterface $e) => null,
                 ]
             ],
 
@@ -140,37 +154,42 @@ class DataTransferObjectTest extends TestCase
              */
 
                 [
+                'int => ?int => ok',
                 ['xyz' => 10],
                 fn($value) => new NullableIntFixture($value),
                 fn(NullableIntFixture $dto, array $input) => self::assertInputIsCopied($dto, $input)
             ],
                 [
+                'null => ?int => ok',
                 ['xyz' => null],
                 fn($value) => new NullableIntFixture($value),
                 fn(NullableIntFixture $dto, array $input) => self::assertInputIsCopied($dto, $input)
             ],
                 [
+                'string => ?int => fail',
                 ['xyz' => 'string value'],
                 fn($value) => new NullableIntFixture($value),
                 null,
                 [
-                    'xyz' => fn (InvalidValueExceptionInterface $e) => null,
+                    'xyz' => fn (ErrorInterface $e) => null,
                 ]
             ],
                 [
+                'array => ?int => error',
                 ['xyz' => []],
                 fn($value) => new NullableIntFixture($value),
                 null,
                 [
-                    'xyz' => fn (InvalidValueExceptionInterface $e) => null,
+                    'xyz' => fn (ErrorInterface $e) => null,
                 ]
             ],
                 [
+                'object => ?int => error',
                 ['xyz' => (object) []],
                 fn($value) => new NullableIntFixture($value),
                 null,
                 [
-                    'xyz' => fn (InvalidValueExceptionInterface $e) => null,
+                    'xyz' => fn (ErrorInterface $e) => null,
                 ]
             ],
 
@@ -180,16 +199,19 @@ class DataTransferObjectTest extends TestCase
              */
 
                 [
+                'int => ?int=null => ok',
                 ['xyz' => 10],
                 fn($value) => new NullableIntDefaultNullFixture($value),
                 fn(NullableIntDefaultNullFixture $dto, array $input) => self::assertInputIsCopied($dto, $input)
             ],
                 [
+                'null => ?int=null => ok',
                 ['xyz' => null],
                 fn($value) => new NullableIntDefaultNullFixture($value),
                 fn(NullableIntDefaultNullFixture $dto, array $input) => self::assertInputIsCopied($dto, $input)
             ],
                 [
+                'none => ?int=null => ok',
                 [],
                 fn($value) => new NullableIntDefaultNullFixture($value),
                 function (NullableIntDefaultNullFixture $dto) {
@@ -203,11 +225,13 @@ class DataTransferObjectTest extends TestCase
              */
 
             [
+                'int => ?int=10 => ok',
                 ['xyz' => 100],
                 fn($value) => new NullableIntDefault10Fixture($value),
                 fn(NullableIntDefault10Fixture $dto, array $input) => self::assertInputIsCopied($dto, $input)
             ],
             [
+                'none => ?int=10 => 10',
                 [],
                 fn($value) => new NullableIntDefault10Fixture($value),
                 function (NullableIntDefault10Fixture $dto) {

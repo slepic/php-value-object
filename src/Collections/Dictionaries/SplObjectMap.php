@@ -2,12 +2,14 @@
 
 namespace Slepic\ValueObject\Collections\Dictionaries;
 
-use Slepic\ValueObject\Collections\CollectionException;
+use Slepic\ValueObject\Collections\CollectionViolation;
 use Slepic\ValueObject\Collections\ImmutableArrayIterator;
 use Slepic\ValueObject\Collections\KeyValuePair;
 use Slepic\ValueObject\Collections\KeyValuePairInterface;
-use Slepic\ValueObject\InvalidValueExceptionInterface;
-use Slepic\ValueObject\ValueObject;
+use Slepic\ValueObject\Error;
+use Slepic\ValueObject\Type;
+use Slepic\ValueObject\ViolationException;
+use Slepic\ValueObject\ViolationExceptionInterface;
 
 /**
  * @psalm-template TKey of object
@@ -22,25 +24,28 @@ abstract class SplObjectMap extends ImmutableArrayIterator implements \JsonSeria
      */
     public function __construct(array $value)
     {
-        $keyFilter = ValueObject::factoryForMethodReturnType(static::class, 'currentKey');
-        $itemFilter = ValueObject::factoryForMethodReturnType(static::class, 'currentValue');
+        $reflection = new \ReflectionClass($this);
+        $keyType = Type::forMethodReturnType($reflection->getMethod('currentKey'));
+        $valueType = Type::forMethodReturnType($reflection->getMethod('currentValue'));
 
         $storage = new \SplObjectStorage();
         $raw = [];
-        $errors = [];
+        $violations = [];
 
         foreach ($value as $rawKey => $item) {
             try {
-                $key = $keyFilter($rawKey);
-            } catch (InvalidValueExceptionInterface $e) {
-                $errors[$rawKey] = $e;
+                $key = $keyType->prepareValue($rawKey);
+            } catch (ViolationExceptionInterface $e) {
+                $error = new Error($keyType->getExpectation(), $rawKey, ...$e->getViolations());
+                $violations[] = new CollectionViolation($rawKey, $error);
                 continue;
             }
 
             try {
-                $item = $itemFilter($item);
-            } catch (InvalidValueExceptionInterface $e) {
-                $errors[$rawKey] = $e;
+                $item = $valueType->prepareValue($item);
+            } catch (ViolationExceptionInterface $e) {
+                $error = new Error($keyType->getExpectation(), $item, ...$e->getViolations());
+                $violations[] = new CollectionViolation($rawKey, $error);
                 continue;
             }
 
@@ -48,8 +53,8 @@ abstract class SplObjectMap extends ImmutableArrayIterator implements \JsonSeria
             $raw[$rawKey] = $key;
         }
 
-        if (\count($errors) !== 0) {
-            throw new CollectionException($errors, $value);
+        if (\count($violations) !== 0) {
+            throw new ViolationException($violations);
         }
 
         $this->storage = $storage;

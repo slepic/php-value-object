@@ -2,7 +2,7 @@
 
 namespace Slepic\ValueObject\Enum;
 
-use Slepic\ValueObject\Strings\StringValue;
+use Slepic\ValueObject\ViolationExceptionInterface;
 
 /**
  * This enum looks up all named constructors to build the list of allowed values.
@@ -43,7 +43,7 @@ abstract class NamedConstructorsEnum extends StringEnumBase
         }
         try {
             return static::fromString($parts[1]);
-        } catch (StringEnumExceptionInterface $e) {
+        } catch (ViolationExceptionInterface $e) {
             throw new \LogicException(
                 static::class . ' is malfunctioning or you call __() not from a named constructor.',
                 (int) $e->getCode(),

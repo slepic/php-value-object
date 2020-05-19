@@ -10,11 +10,7 @@ abstract class UpperBoundInteger extends IntegerValue
     {
         $maxValue = static::maxValue();
         if ($value > $maxValue) {
-            throw new IntegerTooBigException(
-                $maxValue,
-                $value,
-                'Expected at most ' . $maxValue
-            );
+            throw IntegerTooBig::exception($maxValue);
         }
         parent::__construct($value);
     }

@@ -10,9 +10,7 @@ abstract class MinRawLengthString extends StringValue
     {
         $length = \strlen($value);
         $minLength = static::minLength();
-        if ($length < $minLength) {
-            throw new StringTooLongException($minLength, $length, $value);
-        }
+        StringTooShort::check($minLength, $length);
         parent::__construct($value);
     }
 }

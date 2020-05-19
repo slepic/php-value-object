@@ -2,11 +2,12 @@
 
 namespace Slepic\ValueObject\Collections\Dictionaries;
 
-use Slepic\ValueObject\Collections\CollectionException;
-use Slepic\ValueObject\Collections\CollectionExceptionInterface;
-use Slepic\ValueObject\InvalidValueException;
-use Slepic\ValueObject\InvalidValueExceptionInterface;
-use Slepic\ValueObject\ValueObject;
+use Slepic\ValueObject\Collections\CollectionViolation;
+use Slepic\ValueObject\Collections\MissingRequiredProperty;
+use Slepic\ValueObject\Error;
+use Slepic\ValueObject\Type;
+use Slepic\ValueObject\ViolationException;
+use Slepic\ValueObject\ViolationExceptionInterface;
 
 /**
  * Represents a dictionary with a fixed set of properties and their types.
@@ -15,22 +16,12 @@ abstract class DataTransferObject
 {
     /**
      * @param array<string, mixed> $data
-     * @throws CollectionExceptionInterface
      */
     public function __construct(array $data)
     {
-        try {
-            $reflection = new \ReflectionClass(static::class);
-        } catch (\ReflectionException $e) {
-            // this should never happen, but let's make IDE happy :)
-            throw new \RuntimeException(
-                'ReflectionClass failed for static::class',
-                0,
-                $e
-            );
-        }
+        $reflection = new \ReflectionClass(static::class);
 
-        $errors = [];
+        $violations = [];
         $properties = $reflection->getProperties(\ReflectionProperty::IS_PUBLIC);
         foreach ($properties as $property) {
             if ($property->isStatic()) {
@@ -38,30 +29,28 @@ abstract class DataTransferObject
             };
 
             $key = $property->getName();
+            $type = Type::forPropertyReflection($property);
 
-            try {
-                if (\array_key_exists($key, $data)) {
-                    $this->$key = ValueObject::prepareForProperty($property, $data[$key]);
-                } else {
-                    if (!$property->isInitialized($this)) {
-                        throw new InvalidValueException(null, 'Value is required.');
-                    }
+            if (\array_key_exists($key, $data)) {
+                $value = $data[$key];
+                try {
+                    $this->$key = $type->prepareValue($value);
+                } catch (ViolationExceptionInterface $e) {
+                    $error = new Error($type->getExpectation(), $value, ...$e->getViolations());
+                    $violations[] = new CollectionViolation($key, $error);
                 }
-            } catch (InvalidValueExceptionInterface $e) {
-                /*
-                echo "got error for key '$key' and value:\n";
-                var_dump($e->getValue());
-                var_dump(\get_class($e));
-                var_dump($e->getMessage());
-                var_dump($e->getExpectation());
-                throw $e;
-                */
-                $errors[$key] = $e;
+            } else {
+                if (!$property->isInitialized($this)) {
+                    $error = new Error($type->getExpectation(), null, new MissingRequiredProperty());
+                    $violations[] = new CollectionViolation($key, $error);
+                }
             }
         }
 
-        if (\count($errors) !== 0) {
-            throw new CollectionException($errors, $data, 'The object has invalid or missing properties.');
+
+
+        if (\count($violations) !== 0) {
+            throw new ViolationException($violations);
         }
 
         // @todo excess properties??

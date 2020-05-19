@@ -2,12 +2,13 @@
 
 namespace Slepic\ValueObject\Collections\Lists;
 
-use Slepic\ValueObject\Collections\CollectionException;
+use Slepic\ValueObject\Collections\CollectionViolation;
 use Slepic\ValueObject\Collections\ImmutableArrayIterator;
-use Slepic\ValueObject\InvalidTypeException;
-use Slepic\ValueObject\InvalidValueExceptionInterface;
-use Slepic\ValueObject\TypeExpectation;
-use Slepic\ValueObject\ValueObject;
+use Slepic\ValueObject\Error;
+use Slepic\ValueObject\Type;
+use Slepic\ValueObject\Type\TypeViolation;
+use Slepic\ValueObject\ViolationException;
+use Slepic\ValueObject\ViolationExceptionInterface;
 
 /**
  * Represents an array value object with keys being consecutive integers starting at 0.
@@ -18,27 +19,31 @@ abstract class ArrayList extends ImmutableArrayIterator implements \JsonSerializ
 {
     public function __construct(array $value)
     {
-        $filter = ValueObject::factoryForMethodReturnType(static::class, 'current');
+        $reflection = new \ReflectionClass($this);
+        $type = Type::forMethodReturnType($reflection->getMethod('current'));
 
         $index = 0;
         $items = [];
-        $errors = [];
+        $violations = [];
         foreach ($value as $key => $item) {
             if ($key !== $index) {
-                throw new InvalidTypeException(new TypeExpectation('array'), $value);
+                // @todo own violation
+                $violations[] = new TypeViolation();
+                break;
             }
 
             try {
-                $items[] = $filter($item);
-            } catch (InvalidValueExceptionInterface $e) {
-                $errors[$index] = $e;
+                $items[] = $type->prepareValue($item);
+            } catch (ViolationExceptionInterface $e) {
+                $error = new Error($type->getExpectation(), $item, ...$e->getViolations());
+                $violations[] = new CollectionViolation($key, $error);
             }
 
             ++$index;
         }
 
-        if (\count($errors) > 0) {
-            throw new CollectionException($errors, $value);
+        if (\count($violations) > 0) {
+            throw new ViolationException($violations);
         }
 
         parent::__construct($items);

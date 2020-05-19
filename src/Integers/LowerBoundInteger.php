@@ -10,11 +10,7 @@ abstract class LowerBoundInteger extends IntegerValue
     {
         $minValue = static::minValue();
         if ($value > $minValue) {
-            throw new IntegerTooSmallException(
-                $minValue,
-                $value,
-                'Expected at least ' . $minValue
-            );
+            throw IntegerTooSmall::exception($minValue);
         }
         parent::__construct($value);
     }

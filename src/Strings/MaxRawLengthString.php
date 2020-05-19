@@ -10,9 +10,7 @@ abstract class MaxRawLengthString extends StringValue
     {
         $length = \strlen($value);
         $maxLength = static::maxLength();
-        if ($length > $maxLength) {
-            throw new StringTooLongException($maxLength, $length, $value);
-        }
+        StringTooLong::check($maxLength, $length);
         parent::__construct($value);
     }
 }

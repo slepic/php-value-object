@@ -6,11 +6,14 @@ abstract class RegexTemplateString extends StringValue
 {
     abstract protected static function pattern(): string;
 
+    /**
+     * @param string $value
+     */
     public function __construct(string $value)
     {
         $pattern = static::pattern();
         if (1 !== \preg_match($pattern, $value)) {
-            throw new StringException($value, $pattern);
+            throw StringPatternViolation::exception($pattern);
         }
         parent::__construct($value);
     }

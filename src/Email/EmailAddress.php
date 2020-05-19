@@ -2,7 +2,6 @@
 
 namespace Slepic\ValueObject\Email;
 
-use Slepic\ValueObject\Strings\StringException;
 use Slepic\ValueObject\Strings\StringValue;
 
 class EmailAddress extends StringValue
@@ -20,7 +19,7 @@ class EmailAddress extends StringValue
 			([0-9$alpha]([-0-9$alpha]{0,61}[0-9$alpha])?\\.)+    # domain - RFC 1034
 			[$alpha]([-0-9$alpha]{0,17}[$alpha])?                # top domain
 		$)Dix", $value)) {
-            throw new StringException($value, 'Expected valid email address.');
+            throw EmailAddressViolation::exception();
         }
         parent::__construct($value);
     }

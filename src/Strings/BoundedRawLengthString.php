@@ -12,12 +12,7 @@ abstract class BoundedRawLengthString extends StringValue
         $length = \strlen($value);
         $minLength = static::minLength();
         $maxLength = static::maxLength();
-        if ($length < $minLength) {
-            throw new StringTooLongException($minLength, $length, $value);
-        }
-        if ($length > $maxLength) {
-            throw new StringTooLongException($maxLength, $length, $value);
-        }
+        StringLengthOutOfBounds::check($minLength, $maxLength, $length);
         parent::__construct($value);
     }
 }

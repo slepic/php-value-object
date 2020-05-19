@@ -2,31 +2,34 @@
 
 namespace Slepic\ValueObject\Collections\Dictionaries;
 
-use Slepic\ValueObject\Collections\CollectionException;
+use Slepic\ValueObject\Collections\CollectionViolation;
 use Slepic\ValueObject\Collections\ImmutableArrayIterator;
-use Slepic\ValueObject\InvalidValueExceptionInterface;
-use Slepic\ValueObject\ValueObject;
+use Slepic\ValueObject\Error;
+use Slepic\ValueObject\Type;
+use Slepic\ValueObject\ViolationException;
+use Slepic\ValueObject\ViolationExceptionInterface;
 
 abstract class ArrayMap extends ImmutableArrayIterator implements \JsonSerializable
 {
     public function __construct(array $value)
     {
-        $filter = ValueObject::factoryForMethodReturnType(static::class, 'current');
+        $reflection = new \ReflectionClass(static::class);
+        $type = Type::forMethodReturnType($reflection->getMethod('current'));
+
         $items = [];
-        $errors = [];
+        $violations = [];
 
         foreach ($value as $key => $item) {
             try {
-                $items[$key] = $filter($item);
-            } catch (InvalidValueExceptionInterface $e) {
-                echo "caught: " . \get_class($e) . "\n";
-                echo $e->getMessage() . "\n";
-                $errors[$key] = $e;
+                $items[$key] = $type->prepareValue($item);
+            } catch (ViolationExceptionInterface $e) {
+                $error = new Error($type->getExpectation(), $item, ...$e->getViolations());
+                $violations[] = new CollectionViolation($key, $error);
             }
         }
 
-        if (\count($errors) !== 0) {
-            throw new CollectionException($errors, $value);
+        if (\count($violations) !== 0) {
+            throw new ViolationException($violations);
         }
 
         parent::__construct($items);

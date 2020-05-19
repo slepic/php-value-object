@@ -10,9 +10,7 @@ abstract class MaxMbLengthString extends MultiByteString
     {
         $maxLength = static::maxLength();
         $length = \mb_strlen($value);
-        if ($length > $maxLength) {
-            throw new StringTooLongException($maxLength, $length, $value);
-        }
+        StringTooLong::check($maxLength, $length);
         parent::__construct($value, $length);
     }
 }

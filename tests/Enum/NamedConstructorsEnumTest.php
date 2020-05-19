@@ -3,7 +3,8 @@
 namespace Slepic\Tests\ValueObject\Enum;
 
 use PHPUnit\Framework\TestCase;
-use Slepic\ValueObject\Strings\StringExceptionInterface;
+use Slepic\ValueObject\Enum\StringEnumViolation;
+use Slepic\ValueObject\ViolationExceptionInterface;
 
 final class NamedConstructorsEnumTest extends TestCase
 {
@@ -56,8 +57,10 @@ final class NamedConstructorsEnumTest extends TestCase
         try {
             NamedConstructorsEnumFixture::fromString('invalid');
             self::assertTrue(false, 'StringValueExceptionInterface not thrown');
-        } catch (StringExceptionInterface $e) {
-            self::assertSame('invalid', $e->getValue());
+        } catch (ViolationExceptionInterface $e) {
+            $violations = $e->getViolations();
+            self::assertCount(1, $violations);
+            self::assertInstanceOf(StringEnumViolation::class, \reset($violations));
         }
     }
 }

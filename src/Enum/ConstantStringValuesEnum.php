@@ -29,7 +29,6 @@ abstract class ConstantStringValuesEnum extends StringEnumBase
      * @param string $name
      * @param array $arguments
      * @return static
-     * @throws StringEnumExceptionInterface
      */
     public static function __callStatic(string $name, array $arguments): self
     {

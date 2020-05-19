@@ -10,9 +10,7 @@ abstract class MinMbLengthString extends MultiByteString
     {
         $minLength = static::minLength();
         $length = \mb_strlen($value);
-        if ($length < $minLength) {
-            throw new StringTooShortException($minLength, $length, $value);
-        }
+        StringTooShort::check($minLength, $length);
         parent::__construct($value, $length);
     }
 }
