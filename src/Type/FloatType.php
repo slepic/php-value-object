@@ -25,7 +25,7 @@ final class FloatType implements TypeInterface
         return $this->expectation;
     }
 
-    public function prepareValue($value)
+    public function prepareValue($value): float
     {
         if (\is_float($value)) {
             return $value;

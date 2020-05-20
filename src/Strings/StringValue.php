@@ -2,7 +2,9 @@
 
 namespace Slepic\ValueObject\Strings;
 
-class StringValue implements \JsonSerializable
+use Slepic\ValueObject\Type\Downcasting\ToStringConvertibleInterface;
+
+class StringValue implements \JsonSerializable, ToStringConvertibleInterface
 {
     private string $value;
 

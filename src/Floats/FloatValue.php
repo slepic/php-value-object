@@ -2,7 +2,9 @@
 
 namespace Slepic\ValueObject\Floats;
 
-class FloatValue implements \JsonSerializable
+use Slepic\ValueObject\Type\Downcasting\ToFloatConvertibleInterface;
+
+class FloatValue implements \JsonSerializable, ToFloatConvertibleInterface
 {
     private float $value;
 
@@ -16,12 +18,12 @@ class FloatValue implements \JsonSerializable
         return $this->value;
     }
 
-    final public function toInt(): int
+    public function toInt(): int
     {
         return (int) $this->value;
     }
 
-    final public function __toString(): string
+    public function __toString(): string
     {
         return (string) $this->value;
     }

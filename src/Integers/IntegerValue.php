@@ -18,6 +18,11 @@ class IntegerValue implements \JsonSerializable, ToIntConvertibleInterface
         return $this->value;
     }
 
+    final public function toFloat(): float
+    {
+        return (float) $this->value;
+    }
+
     final public function __toString(): string
     {
         return (string) $this->value;

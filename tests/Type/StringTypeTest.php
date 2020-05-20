@@ -3,6 +3,7 @@
 namespace Slepic\Tests\ValueObject\Type;
 
 use PHPUnit\Framework\TestCase;
+use Slepic\ValueObject\Type\Downcasting\ToStringConvertibleInterface;
 use Slepic\ValueObject\Type\StringType;
 use Slepic\ValueObject\Type\TypeViolation;
 use Slepic\ValueObject\ViolationExceptionInterface;
@@ -36,13 +37,32 @@ final class StringTypeTest extends TestCase
 
     public function testConvertibleToStringSuccess(): void
     {
-        $input = new class () {
+        $input = new class () implements ToStringConvertibleInterface {
             public function __toString(): string
             {
                 return 'test';
             }
         };
         self::assertSame('test', $this->type->prepareValue($input));
+    }
+
+    public function testConvertibleToStringWithoutInterfaceFails(): void
+    {
+        $input = new class () {
+            public function __toString(): string
+            {
+                return 'test';
+            }
+        };
+
+        try {
+            $this->type->prepareValue($input);
+            self::assertTrue(false, 'Exception not thrown.');
+        } catch (ViolationExceptionInterface $e) {
+            $violations = $e->getViolations();
+            self::assertCount(1, $violations);
+            self::assertInstanceOf(TypeViolation::class, \reset($violations));
+        }
     }
 
     public function testNullFails(): void

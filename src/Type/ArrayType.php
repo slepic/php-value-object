@@ -25,7 +25,7 @@ final class ArrayType implements TypeInterface
         return $this->expectation;
     }
 
-    public function prepareValue($value)
+    public function prepareValue($value): array
     {
         if (\is_array($value)) {
             return $value;

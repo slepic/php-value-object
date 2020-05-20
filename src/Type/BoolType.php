@@ -25,7 +25,7 @@ final class BoolType implements TypeInterface
         return $this->expectation;
     }
 
-    public function prepareValue($value)
+    public function prepareValue($value): bool
     {
         if (\is_bool($value)) {
             return $value;

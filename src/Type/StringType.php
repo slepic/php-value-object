@@ -2,6 +2,8 @@
 
 namespace Slepic\ValueObject\Type;
 
+use Slepic\ValueObject\Type\Downcasting\ToStringConvertibleInterface;
+
 final class StringType implements TypeInterface
 {
     private TypeExpectationInterface $expectation;
@@ -23,13 +25,13 @@ final class StringType implements TypeInterface
         return $this->expectation;
     }
 
-    public function prepareValue($value)
+    public function prepareValue($value): string
     {
         if (\is_string($value)) {
             return $value;
         }
 
-        if (\is_object($value) && \method_exists($value, '__toString')) {
+        if (\is_object($value) && $value instanceof ToStringConvertibleInterface) {
             return (string) $value;
         }
 

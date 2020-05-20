@@ -25,7 +25,7 @@ final class IntType implements TypeInterface
         return $this->expectation;
     }
 
-    public function prepareValue($value)
+    public function prepareValue($value): int
     {
         if (\is_int($value)) {
             return $value;
