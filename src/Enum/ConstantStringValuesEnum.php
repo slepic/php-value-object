@@ -6,23 +6,8 @@ abstract class ConstantStringValuesEnum extends StringEnumBase
 {
     protected static function createAllUniqueValues(): array
     {
-        $all = [];
         $reflection = new \ReflectionClass(static::class);
-        $constants = $reflection->getReflectionConstants();
-        foreach ($constants as $constant) {
-            if ($constant->isPublic()) {
-                $name = $constant->getName();
-                $value = $constant->getValue();
-                if (!\is_string($value)) {
-                    throw new \UnexpectedValueException("Constant \"$name\" does not have a string value.");
-                }
-                if (isset($all[$value])) {
-                    throw new \UnexpectedValueException("Constant \"$name\" has duplicate value.");
-                }
-                $all[$value] = $value;
-            }
-        }
-        return $all;
+        return ClassConstantsReflection::getUniqueStringConstantValues($reflection);
     }
 
     /**

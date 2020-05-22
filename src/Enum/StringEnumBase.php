@@ -3,8 +3,9 @@
 namespace Slepic\ValueObject\Enum;
 
 use Slepic\ValueObject\Strings\StringValue;
+use Slepic\ValueObject\Type\Upcasting\FromStringConstructableInterface;
 
-abstract class StringEnumBase extends StringValue
+abstract class StringEnumBase extends StringValue implements FromStringConstructableInterface
 {
     /**
      * @var array<string, array<string, static>>|null
