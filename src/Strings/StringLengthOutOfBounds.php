@@ -10,11 +10,14 @@ final class StringLengthOutOfBounds extends StringLengthViolation
     private int $minLength;
     private int $maxLength;
 
-    public function __construct(int $minLength, int $maxLength, int $length)
+    public function __construct(int $minLength, int $maxLength, int $length, string $message = '')
     {
         $this->minLength = $minLength;
         $this->maxLength = $maxLength;
-        parent::__construct($length);
+        parent::__construct(
+            $length,
+            $message ?: "Value of length $length is out of boundaries [$minLength, $maxLength]."
+        );
     }
 
     public function getMinLength(): int

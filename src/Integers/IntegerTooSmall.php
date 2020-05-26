@@ -5,13 +5,14 @@ namespace Slepic\ValueObject\Integers;
 use Slepic\ValueObject\ViolationException;
 use Slepic\ValueObject\ViolationExceptionInterface;
 
-final class IntegerTooSmall implements IntegerViolationInterface
+final class IntegerTooSmall extends IntegerViolation
 {
     private int $lowerBound;
 
-    public function __construct(int $lowerBound)
+    public function __construct(int $lowerBound, string $message = '')
     {
         $this->lowerBound = $lowerBound;
+        parent::__construct($message ?: "Expected integer no smaller then $lowerBound.");
     }
 
     public function getLowerBound(): int

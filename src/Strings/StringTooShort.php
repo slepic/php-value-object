@@ -9,10 +9,10 @@ final class StringTooShort extends StringLengthViolation
 {
     private int $minLength;
 
-    public function __construct(int $minLength, int $length)
+    public function __construct(int $minLength, int $length, string $message = '')
     {
         $this->minLength = $minLength;
-        parent::__construct($length);
+        parent::__construct($length, $message ?: "Expected at least $minLength characters.");
     }
 
     public function getMinLength(): int

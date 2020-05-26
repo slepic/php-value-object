@@ -23,7 +23,10 @@ interface ViolationInterface
      * It may be used as response in simple APIs
      * or just ignore this message and generate your own based on error code.
      *
+     * Anyway, relying on the message having certain form is not recommended,
+     * as the default messages may be changed/improved within bugfix releases.
+     *
      * @return string
      */
-    //public function getMessage(): string;
+    public function getMessage(): string;
 }

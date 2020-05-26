@@ -9,10 +9,10 @@ final class StringTooLong extends StringLengthViolation
 {
     private int $maxLength;
 
-    public function __construct(int $maxLength, int $length)
+    public function __construct(int $maxLength, int $length, string $message = '')
     {
         $this->maxLength = $maxLength;
-        parent::__construct($length);
+        parent::__construct($length, $message ?: "Expected at most $maxLength characters.");
     }
 
     public function getMaxLength(): int

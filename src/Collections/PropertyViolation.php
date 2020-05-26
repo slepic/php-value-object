@@ -5,7 +5,7 @@ namespace Slepic\ValueObject\Collections;
 use Slepic\ValueObject\Type\TypeExpectationInterface;
 use Slepic\ValueObject\Violation;
 
-class PropertyViolation extends Violation implements CollectionViolationInterface
+class PropertyViolation extends Violation implements CollectionItemViolationInterface
 {
     private string $key;
     private TypeExpectationInterface $expectation;

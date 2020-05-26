@@ -5,13 +5,14 @@ namespace Slepic\ValueObject\Integers;
 use Slepic\ValueObject\ViolationException;
 use Slepic\ValueObject\ViolationExceptionInterface;
 
-final class IntegerTooBig implements IntegerViolationInterface
+final class IntegerTooBig extends IntegerViolation
 {
     private int $upperBound;
 
-    public function __construct(int $upperBound)
+    public function __construct(int $upperBound, string $message = '')
     {
         $this->upperBound = $upperBound;
+        parent::__construct($message ?: "Expected integer no greater then $upperBound.");
     }
 
     public function getUpperBound(): int

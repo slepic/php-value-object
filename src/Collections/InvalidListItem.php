@@ -6,7 +6,7 @@ use Slepic\ValueObject\Type\TypeExpectationInterface;
 use Slepic\ValueObject\Violation;
 use Slepic\ValueObject\ViolationInterface;
 
-final class InvalidListItem extends Violation implements CollectionViolationInterface
+final class InvalidListItem extends Violation implements CollectionItemViolationInterface
 {
     private int $key;
     private TypeExpectationInterface $expectation;
