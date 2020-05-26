@@ -22,7 +22,7 @@ final class StringTooShort extends StringLengthViolation
 
     public static function exception(int $minLength, int $length): ViolationExceptionInterface
     {
-        return new ViolationException([new self($minLength, $length)]);
+        return ViolationException::for(new self($minLength, $length));
     }
 
     public static function check(int $minLength, int $length): void

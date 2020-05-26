@@ -15,6 +15,6 @@ final class EmailAddressViolation extends StringViolation
 
     public static function exception(): ViolationExceptionInterface
     {
-        return new ViolationException([new self()]);
+        return ViolationException::for(new self());
     }
 }

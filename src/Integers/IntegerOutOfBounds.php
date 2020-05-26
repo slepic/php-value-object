@@ -29,6 +29,6 @@ final class IntegerOutOfBounds extends IntegerViolation
 
     public static function exception(int $minValue, int $maxValue): ViolationExceptionInterface
     {
-        return new ViolationException([new self($minValue, $maxValue)]);
+        return ViolationException::for(new self($minValue, $maxValue));
     }
 }

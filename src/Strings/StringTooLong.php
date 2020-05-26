@@ -22,7 +22,7 @@ final class StringTooLong extends StringLengthViolation
 
     public static function exception(int $maxLength, int $length): ViolationExceptionInterface
     {
-        return new ViolationException([new self($maxLength, $length)]);
+        return ViolationException::for(new self($maxLength, $length));
     }
 
     public static function check(int $maxLength, int $length): void

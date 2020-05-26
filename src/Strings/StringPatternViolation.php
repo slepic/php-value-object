@@ -22,7 +22,7 @@ final class StringPatternViolation extends StringViolation
 
     public static function exception(string $pattern): ViolationExceptionInterface
     {
-        return new ViolationException([new self($pattern)]);
+        return ViolationException::for(new self($pattern));
     }
 
     public static function check(string $pattern, string $value): void

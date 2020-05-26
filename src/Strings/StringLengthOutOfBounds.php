@@ -32,7 +32,7 @@ final class StringLengthOutOfBounds extends StringLengthViolation
 
     public static function exception(int $minLength, int $maxLength, int $actualLength): ViolationExceptionInterface
     {
-        return new ViolationException([new self($minLength, $maxLength, $actualLength)]);
+        return ViolationException::for(new self($minLength, $maxLength, $actualLength));
     }
 
     public static function check(int $minLength, int $maxLength, int $actualLength): void

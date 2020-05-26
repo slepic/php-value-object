@@ -30,6 +30,6 @@ final class StringEnumViolation extends StringViolation
 
     public static function exception(array $allowedValues): ViolationExceptionInterface
     {
-        return new ViolationException([new self($allowedValues)]);
+        return ViolationException::for(new self($allowedValues));
     }
 }

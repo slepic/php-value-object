@@ -22,6 +22,6 @@ final class FloatTooSmall extends FloatViolation
 
     public static function exception(float $lowerBound): ViolationExceptionInterface
     {
-        return new ViolationException([new self($lowerBound)]);
+        return ViolationException::for(new self($lowerBound));
     }
 }

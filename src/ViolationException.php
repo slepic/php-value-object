@@ -17,8 +17,17 @@ final class ViolationException extends \Exception implements ViolationExceptionI
      */
     public function __construct(array $violations, string $message = "", int $code = 0, \Throwable $previous = null)
     {
+        $violation = \reset($violations);
+        if (!$violation instanceof ViolationInterface) {
+            throw new \InvalidArgumentException('Expected nonempty array of ViolationInterface instances.');
+        }
         $this->violations = $violations;
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message ?: $violation->getMessage(), $code, $previous);
+    }
+
+    public static function for(ViolationInterface ...$violations): self
+    {
+        return new self($violations);
     }
 
     /**

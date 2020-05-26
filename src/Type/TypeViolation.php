@@ -15,6 +15,6 @@ final class TypeViolation extends Violation
 
     public static function exception(string $message = ''): ViolationExceptionInterface
     {
-        return new ViolationException([new self($message)]);
+        return ViolationException::for(new self($message));
     }
 }

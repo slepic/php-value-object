@@ -22,6 +22,6 @@ final class FloatTooBig extends FloatViolation
 
     public static function exception(float $upperBound): ViolationExceptionInterface
     {
-        return new ViolationException([new self($upperBound)]);
+        return ViolationException::for(new self($upperBound));
     }
 }

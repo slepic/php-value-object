@@ -22,6 +22,6 @@ final class IntegerTooBig extends IntegerViolation
 
     public static function exception(int $upperBound): ViolationExceptionInterface
     {
-        return new ViolationException([new self($upperBound)]);
+        return ViolationException::for(new self($upperBound));
     }
 }

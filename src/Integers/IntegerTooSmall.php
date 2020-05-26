@@ -22,6 +22,6 @@ final class IntegerTooSmall extends IntegerViolation
 
     public static function exception(int $lowerBound): ViolationExceptionInterface
     {
-        return new ViolationException([new self($lowerBound)]);
+        return ViolationException::for(new self($lowerBound));
     }
 }
