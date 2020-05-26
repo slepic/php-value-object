@@ -37,7 +37,7 @@ abstract class ArrayList extends ImmutableArrayIterator implements \JsonSerializ
                 $violations[] = new InvalidListItem(
                     $key,
                     $type->getExpectation(),
-                    $value,
+                    $item,
                     $e->getViolations()
                 );
             }
