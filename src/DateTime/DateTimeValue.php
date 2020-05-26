@@ -79,7 +79,7 @@ class DateTimeValue implements \JsonSerializable, ToStringConvertibleInterface
 
     /**
      * @param object $value
-     * @return static
+     * @return self
      * @throws \Slepic\ValueObject\ViolationExceptionInterface
      */
     public static function fromObject(object $value): self
@@ -99,6 +99,10 @@ class DateTimeValue implements \JsonSerializable, ToStringConvertibleInterface
         throw ViolationException::for(new TypeViolation());
     }
 
+    /**
+     * @psalm-suppress InvalidToString
+     * @return string
+     */
     final public function __toString(): string
     {
         return $this->value->format(static::FORMAT);
@@ -134,19 +138,25 @@ class DateTimeValue implements \JsonSerializable, ToStringConvertibleInterface
         return $this->value->getTimezone();
     }
 
-    final public function format($format): string
+    final public function format(string $format): string
     {
         return $this->value->format($format);
     }
 
-    final public function diff($datetime2, $absolute = false): \DateInterval
+    /**
+     * @param \DateTimeInterface|DateTimeValue $datetime2
+     * @param bool $absolute
+     * @return \DateInterval
+     */
+    final public function diff($datetime2, bool $absolute = false): \DateInterval
     {
-        if (!$datetime2 instanceof \DateTimeInterface) {
-            throw new \InvalidArgumentException();
-        }
-
-        if (!\is_bool($absolute)) {
-            throw new \InvalidArgumentException();
+        if ($datetime2 instanceof DateTimeValue) {
+            $datetime2 = $datetime2->toDateTimeImmutable();
+        } else {
+            /** @psalm-suppress DocblockTypeContradiction check in runtime too*/
+            if (!$datetime2 instanceof \DateTimeInterface) {
+                throw new \InvalidArgumentException();
+            }
         }
 
         return $this->value->diff($datetime2, $absolute);

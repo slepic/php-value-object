@@ -12,6 +12,7 @@ final class DateTimeFormatViolation extends StringViolation
 
     public function __construct(string $format, string $message = '')
     {
+        $this->format = $format;
         parent::__construct($message ?: "Expected date in format \"$format\".");
     }
 
