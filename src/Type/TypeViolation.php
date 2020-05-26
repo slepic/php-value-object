@@ -2,14 +2,19 @@
 
 namespace Slepic\ValueObject\Type;
 
+use Slepic\ValueObject\Violation;
 use Slepic\ValueObject\ViolationException;
 use Slepic\ValueObject\ViolationExceptionInterface;
-use Slepic\ValueObject\ViolationInterface;
 
-final class TypeViolation implements ViolationInterface
+final class TypeViolation extends Violation
 {
-    public static function exception(): ViolationExceptionInterface
+    public function __construct(string $message = '')
     {
-        return new ViolationException([new self()]);
+        parent::__construct($message ?: 'Unexpected value type.');
+    }
+
+    public static function exception(string $message = ''): ViolationExceptionInterface
+    {
+        return new ViolationException([new self($message)]);
     }
 }

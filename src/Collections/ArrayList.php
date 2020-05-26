@@ -1,10 +1,7 @@
 <?php declare(strict_types=1);
 
-namespace Slepic\ValueObject\Collections\Lists;
+namespace Slepic\ValueObject\Collections;
 
-use Slepic\ValueObject\Collections\CollectionViolation;
-use Slepic\ValueObject\Collections\ImmutableArrayIterator;
-use Slepic\ValueObject\Error;
 use Slepic\ValueObject\Type;
 use Slepic\ValueObject\Type\TypeViolation;
 use Slepic\ValueObject\ViolationException;
@@ -17,6 +14,10 @@ use Slepic\ValueObject\ViolationExceptionInterface;
  */
 abstract class ArrayList extends ImmutableArrayIterator implements \JsonSerializable
 {
+    /**
+     * @param array $value
+     * @throws ViolationExceptionInterface
+     */
     public function __construct(array $value)
     {
         $reflection = new \ReflectionClass($this);
@@ -27,16 +28,18 @@ abstract class ArrayList extends ImmutableArrayIterator implements \JsonSerializ
         $violations = [];
         foreach ($value as $key => $item) {
             if ($key !== $index) {
-                // @todo own violation
-                $violations[] = new TypeViolation();
-                break;
+                throw TypeViolation::exception('Expected 0-based indices.');
             }
 
             try {
                 $items[] = $type->prepareValue($item);
             } catch (ViolationExceptionInterface $e) {
-                $error = new Error($type->getExpectation(), $item, ...$e->getViolations());
-                $violations[] = new CollectionViolation($key, $error);
+                $violations[] = new InvalidListItem(
+                    $key,
+                    $type->getExpectation(),
+                    $value,
+                    $e->getViolations()
+                );
             }
 
             ++$index;

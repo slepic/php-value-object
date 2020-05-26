@@ -23,4 +23,11 @@ final class StringPatternViolation implements StringViolationInterface
     {
         return new ViolationException([new self($pattern)]);
     }
+
+    public static function check(string $pattern, string $value): void
+    {
+        if (1 !== \preg_match($pattern, $value)) {
+            throw self::exception($pattern);
+        }
+    }
 }

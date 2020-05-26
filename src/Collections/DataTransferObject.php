@@ -1,10 +1,7 @@
 <?php declare(strict_types=1);
 
-namespace Slepic\ValueObject\Collections\Dictionaries;
+namespace Slepic\ValueObject\Collections;
 
-use Slepic\ValueObject\Collections\CollectionViolation;
-use Slepic\ValueObject\Collections\MissingRequiredProperty;
-use Slepic\ValueObject\Error;
 use Slepic\ValueObject\Type;
 use Slepic\ValueObject\ViolationException;
 use Slepic\ValueObject\ViolationExceptionInterface;
@@ -16,6 +13,7 @@ abstract class DataTransferObject
 {
     /**
      * @param array<string, mixed> $data
+     * @throws ViolationExceptionInterface
      */
     public function __construct(array $data)
     {
@@ -36,24 +34,23 @@ abstract class DataTransferObject
                 try {
                     $this->$key = $type->prepareValue($value);
                 } catch (ViolationExceptionInterface $e) {
-                    $error = new Error($type->getExpectation(), $value, ...$e->getViolations());
-                    $violations[] = new CollectionViolation($key, $error);
+                    $violations[] = new InvalidPropertyValue(
+                        $key,
+                        $type->getExpectation(),
+                        $value,
+                        $e->getViolations()
+                    );
                 }
             } else {
                 if (!$property->isInitialized($this)) {
-                    $error = new Error($type->getExpectation(), null, new MissingRequiredProperty());
-                    $violations[] = new CollectionViolation($key, $error);
+                    $violations[] = new MissingRequiredProperty($key, $type->getExpectation());
                 }
             }
         }
 
-
-
         if (\count($violations) !== 0) {
             throw new ViolationException($violations);
         }
-
-        // @todo excess properties??
     }
 
     public function toArray(): array

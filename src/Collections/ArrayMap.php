@@ -1,10 +1,7 @@
 <?php declare(strict_types=1);
 
-namespace Slepic\ValueObject\Collections\Dictionaries;
+namespace Slepic\ValueObject\Collections;
 
-use Slepic\ValueObject\Collections\CollectionViolation;
-use Slepic\ValueObject\Collections\ImmutableArrayIterator;
-use Slepic\ValueObject\Error;
 use Slepic\ValueObject\Type;
 use Slepic\ValueObject\ViolationException;
 use Slepic\ValueObject\ViolationExceptionInterface;
@@ -23,8 +20,12 @@ abstract class ArrayMap extends ImmutableArrayIterator implements \JsonSerializa
             try {
                 $items[$key] = $type->prepareValue($item);
             } catch (ViolationExceptionInterface $e) {
-                $error = new Error($type->getExpectation(), $item, ...$e->getViolations());
-                $violations[] = new CollectionViolation($key, $error);
+                $violations[] = new InvalidPropertyValue(
+                    $key,
+                    $type->getExpectation(),
+                    $value,
+                    $e->getViolations()
+                );
             }
         }
 
