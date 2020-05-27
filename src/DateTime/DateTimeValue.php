@@ -6,7 +6,10 @@ use Slepic\ValueObject\Type\Downcasting\ToStringConvertibleInterface;
 use Slepic\ValueObject\Type\TypeViolation;
 use Slepic\ValueObject\ViolationException;
 
-class DateTimeValue implements \JsonSerializable, ToStringConvertibleInterface
+class DateTimeValue implements
+    \JsonSerializable,
+    ToStringConvertibleInterface,
+    FromDateTimeImmutableConstructableInterface
 {
     protected const FORMAT = \DATE_ATOM;
     protected const TIMEZONE = 'UTC';
@@ -18,7 +21,7 @@ class DateTimeValue implements \JsonSerializable, ToStringConvertibleInterface
         $this->value = $value;
     }
 
-    final public static function timezone(): \DateTimeZone
+    private static function timezone(): \DateTimeZone
     {
         return new \DateTimeZone(static::TIMEZONE);
     }
@@ -78,6 +81,7 @@ class DateTimeValue implements \JsonSerializable, ToStringConvertibleInterface
     }
 
     /**
+     * @psalm-suppress LessSpecificImplementedReturnType
      * @param object $value
      * @return self
      * @throws \Slepic\ValueObject\ViolationExceptionInterface
