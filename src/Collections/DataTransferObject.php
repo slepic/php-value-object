@@ -11,6 +11,8 @@ use Slepic\ValueObject\ViolationExceptionInterface;
  */
 abstract class DataTransferObject
 {
+    protected const IGNORE_UNKNOWN_PROPERTIES = false;
+
     /**
      * @param array<string, mixed> $data
      * @throws ViolationExceptionInterface
@@ -45,6 +47,14 @@ abstract class DataTransferObject
                 if (!$property->isInitialized($this)) {
                     $violations[] = new MissingRequiredProperty($key, $type->getExpectation());
                 }
+            }
+
+            unset($data[$key]);
+        }
+
+        if (!static::IGNORE_UNKNOWN_PROPERTIES && \count($data) > 0) {
+            foreach ($data as $key => $value) {
+                $violations[] = new UnknownProperty($key, $value);
             }
         }
 

@@ -7,6 +7,7 @@ use Slepic\ValueObject\Collections\DataTransferObject;
 use Slepic\ValueObject\Collections\InvalidPropertyValue;
 use Slepic\ValueObject\Collections\ListOfInts;
 use Slepic\ValueObject\Collections\MissingRequiredProperty;
+use Slepic\ValueObject\Collections\UnknownProperty;
 use Slepic\ValueObject\Type\TypeViolation;
 use Slepic\ValueObject\ViolationExceptionInterface;
 
@@ -200,5 +201,44 @@ class DataTransferObjectTest extends TestCase
                 self::assertTrue(false, 'Invalid violation type');
             }
         }
+    }
+
+    public function testThatUnknownPropertiesAreViolationsByDefault(): void
+    {
+        $input = [
+            'extra' => 'value',
+        ];
+
+        try {
+            new class ($input) extends DataTransferObject {
+                public ?int $id = null;
+            };
+            self::assertTrue(false, 'Exception not thrown.');
+        } catch (ViolationExceptionInterface $e) {
+            $violations = $e->getViolations();
+            self::assertCount(1, $violations);
+            $violation = \reset($violations);
+            if ($violation instanceof UnknownProperty) {
+                self::assertSame('extra', $violation->getKey());
+                self::assertSame('value', $violation->getValue());
+            } else {
+                self::assertTrue(false, 'Bad violation type.');
+            }
+        }
+    }
+
+    public function testThatUnknownPropertiesAreIgnoredWhenOverridenConstantFlag(): void
+    {
+        $input = [
+            'id' => 5,
+            'extra' => 'value',
+        ];
+
+        $dto = new class ($input) extends DataTransferObject {
+            const IGNORE_UNKNOWN_PROPERTIES = true;
+            public ?int $id = null;
+        };
+
+        self::assertSame(5, $dto->id);
     }
 }
