@@ -9,9 +9,7 @@ abstract class LowerBoundInteger extends IntegerValue
     public function __construct(int $value)
     {
         $minValue = static::minValue();
-        if ($value > $minValue) {
-            throw IntegerTooSmall::exception($minValue);
-        }
+        IntegerTooSmall::check($minValue, $value);
         parent::__construct($value);
     }
 }

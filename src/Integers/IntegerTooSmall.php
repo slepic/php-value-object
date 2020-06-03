@@ -24,4 +24,11 @@ final class IntegerTooSmall extends IntegerViolation
     {
         return ViolationException::for(new self($lowerBound));
     }
+
+    public static function check(int $lowerBound, int $value): void
+    {
+        if ($value < $lowerBound) {
+            throw self::exception($lowerBound);
+        }
+    }
 }
