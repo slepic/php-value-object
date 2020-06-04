@@ -158,13 +158,25 @@ class UserRegistration extends DataTransferObject
 
 // and voila
 
-$registration = new UserRegistration([
+try {
+  $registration = new UserRegistration([
     'userName' => new UserName($request->name),
     'email' => new EmailAddress($request->email),
     'password' => new UserPassword($request->password),
     'groupIds' => new GroupIds($request->groups),
-]);
+  ]);
+} catch (ViolationExceptionInterface $e) {
+  return $this->createErrorResponse($e->getViolations());
+}
+
+$result = $this->registerUser($registration);
+return $this->createSuccessResponse($result);
 ```   
+
+It is up to you, if and how you present the violations to he client. But it is not restricted to request validations.
+There are probably use cases, when you only care if exception is thrown or not and basically treat it as an InvalidArgumentException.
+
+Maybe in future the violations collections will have a default json serialization methods, but currently it is up to you.
 
 ## Upcasting
 
