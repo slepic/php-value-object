@@ -235,7 +235,7 @@ class DataTransferObjectTest extends TestCase
         ];
 
         $dto = new class ($input) extends DataTransferObject {
-            const IGNORE_UNKNOWN_PROPERTIES = true;
+            protected const IGNORE_UNKNOWN_PROPERTIES = true;
             public ?int $id = null;
         };
 
