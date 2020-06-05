@@ -21,7 +21,7 @@ abstract class ArrayMap extends ImmutableArrayIterator implements \JsonSerializa
                 $items[$key] = $type->prepareValue($item);
             } catch (ViolationExceptionInterface $e) {
                 $violations[] = new InvalidPropertyValue(
-                    $key,
+                    (string) $key,
                     $type->getExpectation(),
                     $value,
                     $e->getViolations()
