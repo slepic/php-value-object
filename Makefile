@@ -4,13 +4,17 @@ DOCKER=docker-compose run --rm php
 CS=--standard=ruleset.xml src tests
 
 INSTALL=composer install --no-interaction
+UPDATE=composer update
 TEST=vendor/bin/phpunit --colors=always tests
 CSCHECK=vendor/bin/phpcs $(CS)
 CSFIX=vendor/bin/phpcbf $(CS)
-PSALM=vendor/bin/psalm
+PSALM=vendor/bin/psalm --show-info=true
 
 install:
 	$(DOCKER) $(INSTALL)
+
+update:
+	$(DOCKER) $(UPDATE)
 
 githooks:
 	.githooks/init.sh
