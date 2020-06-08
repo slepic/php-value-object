@@ -1,5 +1,5 @@
 # php-value-object
-Simple PHP Value Objects and Enums
+PHP Value Objects
 
 # Requirements
 
@@ -13,229 +13,284 @@ composer require slepic/value-object
 
 # Introduction
 
+This library aims to provide unification of commonalities of all value objects.
+Additionally, it provides some features that take advantage of the unified environment.
+
+## What is a value object?
+
 Value objects are guards of validity. Once a value object is constructed, it contains valid data.
 And as long as that object lives, we don't have to validate it again.
 
-This packages provides a uniform way of writing value objects.
-
 ```
-function log(float $x): float
+final class FullName
 {
-  if ($x <= 0.0) {
-    throw new \InvalidArgumentException();
-  }
+  public string $firstName;
+  public string $surname;
 
-  // your implementation
-}
-```
-
-Are you tired of these checks in your code. Value objects to the rescue!
-
-```
-function log (PositiveFloat $value): float
-{
-  $x = $value->toFloat();
-  // $x is definitely a positive float
-
-  // your implementation
-}
-```
-
-or if you dont't want to delegate the responsibility for creating the value object to the outsider.
-
-```
-function log(float $x): float
-{
-  new PositiveFloat($x);
-  // now $x is sure positive, otherwise an exception has been thrown
-
-  // your implementation
-}
-```
-
-But wait, there is more. Since all the value objects have uniform exceptions,
-we can easily implement nonuniform collections, like data transfer objects.
-
-And guess what? They are included in this package.
-
-## Validation, Error Reporting
-
-Lets say we have a user registration endpoint and we model the request structure like this:
-```
-class UserRegistration
-{
-  public string $userName;
-  public string $email;
-  public string $password;
-  public array $groupIds;
-}
-```
-
-Easy, right? But further in our code we check that username has only letters
-and is at most some characters long to fit into our db column.
-Also email has to be a valid address. Password has some limitations too.
-And group ids are exactly 10 char long hexadecimal strings.
-
-So we validate those restrictions before we create the model instance and
-anyone who uses that instance is then left wondering if it really contains valid data.
-
-So we put our validations into the class's constructor to be sure.
-
-We can get much better than this.
-
-This package provides a single exception:
-ViolationExceptionInterface
-
-this exception has a single method getViolations() which returns an array of violations.
-A violation is an instance of ViolationInterface
-which represents a machine readable error code and human readable error message.
-The error code is represented by the violation class itself.
-This allows for inheritance between error codes and also errors codes can carry additional data.
-
-Every value objects is free to throw ViolationException with as many violations as it likes.
-Usualy scalar value objects throw just one, while collections may throw more.
-Although, nothing prevents you from throwing multiple violations from a scalar value object.
-
-Collection violations also provide a way to describe the expected type through TypeExpectationInterface
-which is basically an abstract over ReflectionClass, but also works for builtin types.
-
-The validation of value objects is therefore "report all errors" rather than "report first error"
-which is more suitable for APIs, although the usage of value objects is sure not restricted to those use cases.
-
-
-```
-final class UserName extends BoundedMbLengthString
-{
-  protected static function minLength(): int {return 5;}
-  protected static function minLength(): int {return 64;}
-
-  public function __construct(string $value) {
-    StringPatternViolation::check('/^[a-zA-Z0-9]+$/', $value);
-    parent::__construct($value);
-  }
-}
-
-final class UserPassword extends SomeBaseString
-{
-  // implement some restrictoins in constructor
-}
-
-final class GroupId extends BoundedRawLengthString implements
-  FromStringConstructableInterface
-{
-  protected static function minLength(): int {return 10;}
-  protected static function minLength(): int {return 10;}
-
-  public function __construct(string $value) {
-    StringPatternViolation::check('/^[a-f0-9]+$/', $value);
-    parent::__construct($value);
-  }
-
-  public statuc function fromString(string $value): self
+  public function __construct(string $firstName, string $surname)
   {
-    // notice if we didnt finalize the class
-    // we should at least finalize the constructor
-    return new self($value);
+    if ($firstName === '') {
+      throw \InvalidArgumentException(''First name cannot be empty.');
+    }
+
+    if ($surname === '') {
+      throw new \InvalidArgumentException('Surname cannot be empty.');
+    }
+
+    $this->firstName = $firstName;
+    $this->surname = $surname;
   }
 }
+```
 
-final class GroupIds extends ArrayList
+Note: For simplicity, I am exposing everything in the example as public properties which allows modifications.
+They should really be private with public getters.
+
+## What commonalities do value objects have?
+
+* They are (or at least should be) immutable
+* They cannot be constructed into invalid state
+* Attempt to construct them with invalid data leads to exception
+* They can be constructed from primitive data types
+* They can be converted to primitive data types
+
+## What this library cannot unify?
+
+* immutability - this is always going to be responsibility of the implementor of a concrete value object
+* valid state after construction - we cannot enforce this either
+
+## What this library can unify?
+
+* invalid state is reported as an exception - we can unify what kind of exception is thrown
+* convertability from/to primitives - we can unify how value objects expose these abilities
+* common value objects - we can provide a set of common value objects for many applications to reuse
+
+## How can we take advantage of such unifications?
+
+### Unified errors
+
+Since value objects need valid state, they have to check it.
+And this inherently means that they are doing validations and they have to do it themselves.
+If we just let value objects throw \InvalidArgumentException and instead we do validations (with client error reporting)
+beforehand, we are basically doing the validation twice.
+Once to feed the client with reasonable explanation where he screwed up
+and once in the value object to make sure it's not constructed from bullocks.
+And if we are lazy, we omit one or the other (or both in worst case).
+
+Omitting validation outside value objects means that our value objects may throw and we end up with 500 Internal Server Error.
+Omitting validation inside value objects means that we will never be truly sure that they are valid.
+Omitting them both is just disaster.
+Having both is redundant and may lead to de-synchronization between the two.
+
+If our value objects do the validations (which they should anyway) 
+and offer a unified way to describe their expectations and eventual violations of said expectations,
+they effectively force you to validate your data:
+* once
+* in whichever point in code you find appropriate
+* using the logic of your value objects 
+
+Unification of how value objects represent violations allows applications to incorporate value objects
+errors into their input validation process.
+
+However, the way this incorporation is done for specific application is outside the scope of the library.
+
+This library attempts to unify the error exception as `ViolationExceptionInterface` with a `getViolations(): array<ViolationInterface>` method.
+A default implementation `ViolationException` is also provided by the library.
+
+`ViolationInterface` is a marker interface for violations and each violation class name represents an error code.
+With possibility to carry additional information exposed as properties/getters.
+This also allows for error code inheritance and avoids error code conflicts between vendors.
+
+Having an array of violations also gives is the option to report multiple violations at the same time.   
+
+```
+final class FullName
 {
-  // ArrayList uses the return typehint for constructor validation
-  public function current(): GroupId
+  public string $firstName;
+  public string $surname;
+
+  public function __construct(string $firstName, string $surname)
   {
-    return parent::current();
+    $violations = []
+    if ($firstName === '') {
+      $violations[] = new Violation(''First name cannot be empty.');
+    }
+
+    if ($surname === '') {
+      $violations[] = new Violation('Surname cannot be empty.');
+    }
+
+    if (\count($violations) > 0) {
+      throw new ViolationException($violations);
+    }
+
+    $this->firstName = $firstName;
+    $this->surname = $surname;
   }
 }
-
-class UserRegistration extends DataTransferObject
-{
-  public UserName $userName;
-  public EmailAddress $email;
-  public UserPassword $password;
-  public GroupIds $groupIds;
-}
-
-// and voila
 
 try {
-  $registration = new UserRegistration([
-    'userName' => new UserName($request->name),
-    'email' => new EmailAddress($request->email),
-    'password' => new UserPassword($request->password),
-    'groupIds' => new GroupIds($request->groups),
-  ]);
+  $slimShady = new FullName('Slim', 'Shady');
 } catch (ViolationExceptionInterface $e) {
-  return $this->createErrorResponse($e->getViolations());
+  return $this->processViolations($e->getViolations());
 }
-
-$result = $this->registerUser($registration);
-return $this->createSuccessResponse($result);
-```   
-
-It is up to you, if and how you present the violations to he client. But it is not restricted to request validations.
-There are probably use cases, when you only care if exception is thrown or not and basically treat it as an InvalidArgumentException.
-
-Maybe in future the violations collections will have a default json serialization methods, but currently it is up to you.
-
-## Upcasting
-
-Now we finally have a registration object that is sure valid and we can immediately tell.
-But wait won't this throw TypeErrors if someone sends me a integer as a user name, or array as email.
-Yes it will, but we have solution for this as well.
-Just have the value objects implements one of our "upcasting" interfaces.
-I've actually included one in the example above where GroupIds collection is already relying on it
-to convert array of strings to array of GroupId instances.
-
-Currently these interfaces are not implemented by default, because there would be no way to turn it off.
-And also when implementing these interfaces, you should finalize your constructors
-and we don't want to finalize them in the base classes
-(it is more likely that in future we will provide a set of base classes with sealed constructors).
-
-When we implement relevant upcasting interfaces on all the value objects we can end up doing just this:
-```
-$registration = new UserRegistration([
-    'userName' => $request->name,
-    'email' => $request->email,
-    'password' => $request->password,
-    'groupIds' => $request->groups,
-]);
 ```
 
-Now we no longer are worried about TypeErrors, because the value objects engine
-will solve this for you, if improper types are passed a ViolationExceptionInterface
-will be thrown with TypeViolation violation for the mismatching types.
+A set of implementations is provided by this library, including some violations that describe nested errors of collections.
 
-The code has became a bit longer and if you honor PSR-4 you've probably created quite a bit new files.
-But the increase in explicitness about your validity expectations is worth it, IMO.
+### Unified conversions
 
-## Downcasting
+Often value objects provide named constructors that allow to construct them from a primitive.
+And it isn't also uncommon that value objects can convert themselves to a primitive type.
 
-The package also supports downcasting of value objects to primitve types.
+This library provides a set of interfaces that define how conversion from and to primitive types should look like.
+
+In the example below, they are the `FromStringConstructableInterface` and `ToStringConvertibleInterface`,
+defining the `public static function fromString(string $value): self` and `public function __toString(): string` methods respectively.
+
+This gives as unified environment.
+It is sure easier to work with if all value objects that can be constructed from a single string value
+have the same named constructor for this.
+And, well, in case of conversion to string, that is already covered by PHP's magic method `__toString()`,
+but we also offer interfaces for int, float, etc. that go about the same names like `ToIntConvertibleInterface` and so on... 
 
 ```
-class MyDto extends DataTransferObject
+final class FullName implements FromStringConstructableInterface, ToStringConvertibleInterface
 {
-  public string $primiteValue;
+  // ...
+
+  public static function fromString(string $fullName): FullName
+  {
+    $parts = \explode(' ', $fullName, 2);
+    if (\count($parts) !== 2) {
+      throw \InvalidArgumentException('Full name must contain first name, a space and the surname.');
+    }
+    return new FullName($parts[0], $parts[1]);
+  }
+
+  public function __toString(): string
+  {
+    return $this->firstName . ' ' . $this->surname;
+  }
 }
 
-new MyDto([
-  'primitiveValue' => new StringValue('xy')
-]);
+$slimShady = FullName::fromString('Slim Shady');
+echo (string) $slimShady;
 ```
 
-Downcasting is automatically invoked by collections when they encounter value object where they expect a primitive type.
-A value object must implement the appropriate downcasting interface, 
-ie. ToStringConvertibleInterface. An object with a __toString method will not be downcasted
-unless also implements the ToStringConvertibleInterface
+And it allows to automatically construct composite value objects using their own class definition.
+See collections section.
 
-And unlike upcasting, downcasting interface are implemented by the base value objects, but
-only for the primitive type that is actually used as the underlying representation.
+### Common value objects
 
-Ie. IntegerValue has a __toString method, but does not implement ToStringConvertibleInterface.
-On other hand it implements ToIntConvertibleInterface because it uses int as the underlying type. 
+Now, wait a minute! Both first name and surname check the same thing.
+Let's get rid of that duplication.
 
-## Overview
+```
+final class StringIsEmpty extends Violation
+{
+  public function __construct(string $message = '')
+  {
+    parent::__construct($message ?: 'Value cannot be empty');
+  }
+}
+
+class NonEmptyString
+{
+  private string $value;
+
+  public function __construct(string $value)
+  {
+    if ($value === '') {
+      throw ViolationException::for(new StringIsEmpty());
+    }
+    $this->value = $value;
+  }
+
+  public function __toString(): string
+  {
+    return $this->value;
+  }
+}
+
+final class FullName
+{
+  public NonEmptyString $firstName;
+  public NonEmptyString $surname;
+
+  public function __construct(NonEmptyString $firstName, NonEmptyString $surname)
+  {
+    $this->firstName = $firstName;
+    $this->surname = $surname;
+  }
+}
+```
+
+We have moved the responsibility for checking the value emptiness to the `NonEmptyString` class.
+However we have lost the ability to be specific about which property it is that is empty.
+
+That is however responsibility of the caller of the constructor,
+because he is now creating those NonEmptyString value objects.
+
+Let's see such a caller in the form of a factory that creates the object from primitive strings.
+It now manages the error codes and messages and overrides the defaults, while using the same codes (violation classes).
+```
+function createFullName(string $firstName, string $surname): FullName
+{
+    $violations = [];
+    
+    try {
+      $f = new NonEmptyString($firstName);
+    } catch (ViolationExceptionInterface $e) {
+      $violations[] = new StringIsEmpty('First name cannot be empty.');
+    }
+    
+    try {
+      $s = new NonEmptyString($surname);
+    } catch (ViolationExceptionInterface $e) {
+      $violations[] = new StringIsEmpty('Surname cannot be empty.');
+    }
+    
+    if (\count($violations) > 0) {
+      throw new ViolationException($violations);
+    }
+    
+    return new FullName($f, $s);
+}
+```
+
+But we have also added a new type that is now a guarantee of non empty string.
+
+And you know, if you don't care that much for all the violations, you do just this:
+```
+function createFullName(string $firstName, string $surname): FullName
+{
+    return new FullName(
+        new NonEmptyString($firstName),
+        new NonEmptyString($surname)
+    );
+}
+```
+
+Anyway, we can now avoid some checks on other places.
+
+```
+function extractFirstChar(NonEmptyString $text): string
+{
+  // if we accepted the primitive `string $text` here, we should check its emptiness
+  // and throw an exception otherwise. Now we don't have to :)
+  return \substr((string) $text, 0, 1);
+}
+
+echo extractFirstChar($fullName->firstName) . '.' . extractFirstChar($fullName->surname) . '.';
+```
+
+This effectively forces the caller to validate the input at some point,
+while leaving the function to care only about its logic.
+
+This library provides a set of base value objects that encapsulate some common restrictions we have on our primitive data types.
+ 
+## Base Value Objects
 
 Often we need to wrap primitive values and enforce some kind of limitation, like a limit on a string length,
 allow only subset of all characters in a string, or limit a maximum value of a number.
@@ -383,3 +438,52 @@ Additionaly we provide a set of standard value objects for common things, like e
 But this sections is currently not ready and in future this may probably be in a separate package.
 
 * see Slepic\ValueObject\Standard namespace
+
+### Upcasting
+
+Whenever a collection expects a value object type and it receives a primitive type,
+it will look for the appropriate upcasting interface on the target value object class.
+If it exists, it will automatically construct the value object using the interface.
+
+```
+final class MyDto extends DataTransferObject
+{
+  public StringValue $string;
+}
+
+new MyDto([
+  'string' => 'value',
+]);
+```
+
+Existing upcasting interfaces are:
+* FromIntConstructableInterface
+* FromFloatConstructableInterface
+* FromStringConstructableInterface
+* FromArrayConstructableInterface
+* FromObjectConstructableInterface
+* FromBoolConstructableInterface
+
+### Downcasting
+
+Whenever a collection expects a primitive type and it receives an object,
+it will look for the appropriate downcasting interface on the value.
+If it exists it will be used to obtain the primitive value.
+
+```
+fina class MyDto extends DataTransferObject
+{
+  public string $string;
+}
+
+new MyDto([
+  'string' => new StringValue('value'),
+]);
+```
+
+Existing downcasting interface are:
+* ToIntConvertibleInterface
+* ToFloatConvertibleInterface
+* ToStringConvertibleInterface
+* ToArrayConvertibleInterface
+* ToBoolConvertibleInterface
