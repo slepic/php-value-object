@@ -43,16 +43,15 @@ abstract class DataTransferObject
                         $e->getViolations()
                     );
                 }
+                unset($data[$key]);
             } else {
                 if (!$property->isInitialized($this)) {
                     $violations[] = new MissingRequiredProperty($key, $type->getExpectation());
                 }
             }
-
-            unset($data[$key]);
         }
 
-        if (!static::IGNORE_UNKNOWN_PROPERTIES && \count($data) > 0) {
+        if (!static::IGNORE_UNKNOWN_PROPERTIES) {
             foreach ($data as $key => $value) {
                 $violations[] = new UnknownProperty($key, $value);
             }
