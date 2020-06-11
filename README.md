@@ -14,7 +14,11 @@ composer require slepic/value-object
 # Introduction
 
 This library aims to provide unification of commonalities of all value objects.
-Additionally, it provides some features that take advantage of the unified environment.
+Additionally, it provides some features that take advantage of the unified environment:
+ * unified language to describe violations can be integrated with validation systems
+ * common base value objects for enums, collections and scalar types with restrictions
+ * interfaces to unify conversions from and to primitive types, or even between objects
+ * automatic construction of composite value objects using their own class definition
 
 ## What is a value object?
 
@@ -43,7 +47,7 @@ final class FullName
 }
 ```
 
-Note: For simplicity, I am exposing everything in the example as public properties which allows modifications.
+Note: For simplicity, I am exposing everything in the examples as public properties which allows modifications.
 They should really be private with public getters.
 
 ## What commonalities do value objects have?
@@ -54,18 +58,18 @@ They should really be private with public getters.
 * They can be constructed from primitive data types
 * They can be converted to primitive data types
 
-## What this library cannot unify?
-
-* immutability - this is always going to be responsibility of the implementor of a concrete value object
-* valid state after construction - we cannot enforce this either
-
 ## What this library can unify?
 
 * invalid state is reported as an exception - we can unify what kind of exception is thrown
 * convertability from/to primitives - we can unify how value objects expose these abilities
 * common value objects - we can provide a set of common value objects for many applications to reuse
 
-## How can we take advantage of such unifications?
+## What this library cannot unify?
+
+* immutability - this is always going to be responsibility of the implementor of a concrete value object
+* valid state after construction - we cannot enforce this either
+
+## How can we take advantage of the unifications?
 
 ### Unified errors
 
@@ -289,6 +293,9 @@ This effectively forces the caller to validate the input at some point,
 while leaving the function to care only about its logic.
 
 This library provides a set of base value objects that encapsulate some common restrictions we have on our primitive data types.
+
+Note: ViolationInterface implementations should only describe the error, what it is that was violated.
+If consumers want to know everything that could have been violated, they have to reach for the value object type itself. 
  
 ## Base Value Objects
 
@@ -391,6 +398,10 @@ new MyDto([
 ]); // ok
 new MyDto([]); //ViolationsException with 2 MissingRequiredProperty violations
 ```
+
+Note: If you sometimes need to construct the object not from array, but directly from separate variables,
+consider not extending DataTransferObject, implement your object, with own constructor and
+use `FromArrayConstructor` helper class to simplify the creation from array. 
    
 #### ArrayList
 * expects iterable with zero based index keys and all values matching the same type
@@ -431,6 +442,47 @@ class MyMap extend ArrayMap
 new MyMap(['a' => 1.0, 'b' => 2.0, 'c' => 3.5]); // ok
 new MyMap(['a' => 1, 'b' => 2.0, 'c' => 3.5]); //ViolationException with InvalidPropertyValue
 ```
+
+### FromArrayConstructor
+This is not a value object, it is a static helper class which simplifies construction of objects
+from associative array of named parameters for their class constructor.
+
+```
+class MyValueObject
+{
+  private string $x;
+  private int $y;
+
+  public function __construct(string $x, int $y)
+  {
+    $this->x = $x;
+    $this->y = $y;
+  }
+
+  public static function fromArray(array $data): self
+  {
+    return FromArrayConstructor::constructFromArray(static::class, $data);
+  }
+}
+
+$vo = MyValueObject::fromArray([
+  'x' => 'test',
+  'y' => 10,
+]);
+```
+
+This helper also supports upcasting and downcasting. See upcasting/downcasting sections.
+
+Constructor parameters must have a default value to become optional in the input array.
+
+By default the method reports any unexpected properties of the input through `UnknownProperty` violation.
+This can be turned off by passing true as the 3rd parameter to the `constructFromArray` method.
+
+Basically, this method throws the same violations as DataTransferObject.
+
+Note: writing these value objects will become even easier with PHP8's constructor promotion.
+If you only need your object constructed from array and the constructor itself seems like a burden,
+you should consider DataTransferObject instead.
 
 ### Standards
 
@@ -487,3 +539,52 @@ Existing downcasting interface are:
 * ToStringConvertibleInterface
 * ToArrayConvertibleInterface
 * ToBoolConvertibleInterface
+
+
+# FAQ
+
+### Is this only usable for validation
+
+No. That's only a side effect that it allows to enhance and integrate with your validation system.
+
+### What other use cases are there.
+
+This is basically for any use case where you would use a value object.
+It just helps you write them in unified way and simplifies some of its concerns.
+
+### How about contextual validation? Some field must be an email if another field has a specific value?
+
+That is up to the constructor of the value object. Such a rule cannot be attributed to either of the fields alone.
+It's absolutely fine to define your own violation class for that and eventually reuse it in multiple value objects.
+
+### How about nested validation rules? A client (user/api consumer etc) is sending data to your app and it gets back some errors? How do I communicate back "hey, addresses[5].state is not a valid state"?
+
+The communication of invalid state to the client is under control of your application.
+You can take advantage on unified violations environment, but you still have to be aware of
+what kinds of violations your value objects throw and represent each of them accordingly.
+Although violations are represented as classes, they really are just simple error codes
+with additional features leveraging the PHP class system.
+The violations from Collections namespace should make it easy enough to create nested violations
+for nested value objects. See the code of the collections to see how they are used.
+And you can also check their tests to see how we check for what happened in the nested violations tree.
+
+### How about custom validation messages?
+
+Validation messages provided by ViolationInterface::getMessage() are not meant to be communicated to the client directly.
+They represent an immediately readable explanation of the violation for a developer.
+But if the violations are to be communicated to a general user, the messages should be generated
+within your application's validation system, based on the error codes and eventually other violation properties.
+
+You can use the default messages probably only on API where devs are the only ones who is going to read them.
+
+Chances are though, that in future the ViolationInterface::getMessage() method will be removed entirely.
+
+Some component that simplify this task of integrating the violations into validation systems may be created in future.
+At this point this is out of the scope of the library, and it would probably become a separate package anyway.
+
+### How about validation that requires dependencies (eg: a database connection)?
+
+It is of course possible to throw the unified ViolationExceptionInterface from any factory you want.
+But this cannot happen within the automatic upcasting, since it happens through static named constructors. 
+But there is no problem passing an already created value object to an automatically constructed value object from this package.
+And that makes it irrelevant whether the passed-in value object needed database to be created or not. 

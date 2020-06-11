@@ -95,6 +95,23 @@ final class Type
     {
         $type = $method->getReturnType();
         if ($type === null) {
+            throw new \UnexpectedValueException(
+                'Method ' . $method->getName() . ' does not have a return type.'
+            );
+        }
+
+        if (!$type instanceof \ReflectionNamedType) {
+            throw new \RuntimeException('ReflectionNamedType not supported.');
+        }
+
+        return self::forTypeReflection($type);
+    }
+
+
+    public static function forMethodParameterType(\ReflectionParameter $parameter): TypeInterface
+    {
+        $type = $parameter->getType();
+        if ($type === null) {
             throw new \UnexpectedValueException('Method current does not have a return type.');
         }
 
