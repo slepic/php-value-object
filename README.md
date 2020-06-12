@@ -463,22 +463,46 @@ class MyValueObject
   {
     return FromArrayConstructor::constructFromArray(static::class, $data);
   }
+
+  public function with(array $data): self
+  {
+    return FromArrayConstructor::combineWithArray($this, $data);
+  }
+
+  public functin toArray(): array
+  {
+    return FromArrayConstructor::extractConstructorArguments($this);
+  }
 }
 
 $vo = MyValueObject::fromArray([
   'x' => 'test',
   'y' => 10,
 ]);
+
+$vo2 = $vo->with(['y' => $vo->y + 1]);
 ```
 
 This helper also supports upcasting and downcasting. See upcasting/downcasting sections.
 
 Constructor parameters must have a default value to become optional in the input array.
+The parameters also must have a typehint.
 
 By default the method reports any unexpected properties of the input through `UnknownProperty` violation.
-This can be turned off by passing true as the 3rd parameter to the `constructFromArray` method.
+This can be turned off by passing true as the 3rd parameter `$ignoreExtraProperties`.
 
 Basically, this method throws the same violations as DataTransferObject.
+
+The `combineWithArray` method expects that non-instance properties exists with the same name as each constructor parameter,
+that is not passed as the `$data` argument to the `combineWithArray` method.
+These properties must have a compatible type with the respective constructor parameter.
+Calling the `combineWithArray` method on objects that don't obey this rule, will result in a LogicException
+and no violations will be reported. 
+
+The `extractConstructorArguments` method expects non-instance properties exist with the same name as each constructor parameter,
+These properties must have a compatible type with the respective constructor parameter.
+Calling the `extractConstructorArguments` method on objects that don't obey this rule, will result in a LogicException
+and no violations will be reported. 
 
 Note: writing these value objects will become even easier with PHP8's constructor promotion.
 If you only need your object constructed from array and the constructor itself seems like a burden,
