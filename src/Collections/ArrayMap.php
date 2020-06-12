@@ -23,7 +23,7 @@ abstract class ArrayMap extends ImmutableArrayIterator implements \JsonSerializa
                 $violations[] = new InvalidPropertyValue(
                     (string) $key,
                     $type->getExpectation(),
-                    $value,
+                    $item,
                     $e->getViolations()
                 );
             }

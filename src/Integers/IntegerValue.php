@@ -2,10 +2,13 @@
 
 namespace Slepic\ValueObject\Integers;
 
+use Slepic\ValueObject\ImmutableObjectTrait;
 use Slepic\ValueObject\Type\Downcasting\ToIntConvertibleInterface;
 
 class IntegerValue implements \JsonSerializable, ToIntConvertibleInterface
 {
+    use ImmutableObjectTrait;
+
     private int $value;
 
     public function __construct(int $value)

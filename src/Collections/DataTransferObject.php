@@ -2,6 +2,7 @@
 
 namespace Slepic\ValueObject\Collections;
 
+use Slepic\ValueObject\ImmutableObjectTrait;
 use Slepic\ValueObject\Type;
 use Slepic\ValueObject\ViolationException;
 use Slepic\ValueObject\ViolationExceptionInterface;
@@ -11,6 +12,8 @@ use Slepic\ValueObject\ViolationExceptionInterface;
  */
 abstract class DataTransferObject
 {
+    use ImmutableObjectTrait;
+
     protected const IGNORE_UNKNOWN_PROPERTIES = false;
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Slepic\ValueObject\DateTime;
 
+use Slepic\ValueObject\ImmutableObjectTrait;
 use Slepic\ValueObject\Type\Downcasting\ToStringConvertibleInterface;
 use Slepic\ValueObject\Type\TypeViolation;
 use Slepic\ValueObject\ViolationException;
@@ -11,6 +12,8 @@ class DateTimeValue implements
     ToStringConvertibleInterface,
     FromDateTimeImmutableConstructableInterface
 {
+    use ImmutableObjectTrait;
+
     protected const FORMAT = \DATE_ATOM;
     protected const TIMEZONE = 'UTC';
 

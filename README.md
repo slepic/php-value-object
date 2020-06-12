@@ -50,24 +50,21 @@ final class FullName
 Note: For simplicity, I am exposing everything in the examples as public properties which allows modifications.
 They should really be private with public getters.
 
-## What commonalities do value objects have?
+## What commonalities do value objects have a how we unify them?
 
 * They are (or at least should be) immutable
+  * we cannot fully enforce that the value objects you create are immutable
+  * we can only support you in creating immutable objects
+  * we provide base classes and traits that prevent implementation of some mutable magic methods and mutable methods of \ArrayAccess 
 * They cannot be constructed into invalid state
+  * we cannot fully enforce this either
+  * we can support you by providing base value objects that obey the rule
 * Attempt to construct them with invalid data leads to exception
+  * we can unify what kind of exception is thrown
 * They can be constructed from primitive data types
+  * we can unify how value objects expose this ability
 * They can be converted to primitive data types
-
-## What this library can unify?
-
-* invalid state is reported as an exception - we can unify what kind of exception is thrown
-* convertability from/to primitives - we can unify how value objects expose these abilities
-* common value objects - we can provide a set of common value objects for many applications to reuse
-
-## What this library cannot unify?
-
-* immutability - this is always going to be responsibility of the implementor of a concrete value object
-* valid state after construction - we cannot enforce this either
+  * we can unify how value objects expose this ability
 
 ## How can we take advantage of the unifications?
 
@@ -297,6 +294,25 @@ This library provides a set of base value objects that encapsulate some common r
 Note: ViolationInterface implementations should only describe the error, what it is that was violated.
 If consumers want to know everything that could have been violated, they have to reach for the value object type itself. 
  
+## Immutable Traits
+
+This package offers two traits that support immutability of value objects.
+
+`ImmutableObjectTrait` - disables implementation of magic `__set` and `__unset` methods.
+
+`ImmutableArrayAccessTrait` - disables implementation of `ArrayAccess::offsetSet` and `ArrayAccess::offsetUnset`.
+
+These traits are used by all the base value objects in this package.
+And you are encouraged to use them on your value objects as well.
+
+Nevertheless you are still free to create public properties.
+There's actually one exception in this package that relies on public properties - DataTransferObject class.
+But other than that, we discourage you from using them, although it is often a bit less writing if you do.
+
+You are also always free to modify your objects using reflection, etc.
+So to be truly immutable is basically impossible in PHP.
+But we try as much as we can :)
+ 
 ## Base Value Objects
 
 Often we need to wrap primitive values and enforce some kind of limitation, like a limit on a string length,
@@ -443,7 +459,7 @@ new MyMap(['a' => 1.0, 'b' => 2.0, 'c' => 3.5]); // ok
 new MyMap(['a' => 1, 'b' => 2.0, 'c' => 3.5]); //ViolationException with InvalidPropertyValue
 ```
 
-### FromArrayConstructor
+#### FromArrayConstructor
 This is not a value object, it is a static helper class which simplifies construction of objects
 from associative array of named parameters for their class constructor.
 
@@ -463,26 +479,98 @@ class MyValueObject
   {
     return FromArrayConstructor::constructFromArray(static::class, $data);
   }
+
+  public function with(array $data): self
+  {
+    return FromArrayConstructor::combineWithArray($this, $data);
+  }
+
+  public functin toArray(): array
+  {
+    return FromArrayConstructor::extractConstructorArguments($this);
+  }
 }
 
 $vo = MyValueObject::fromArray([
   'x' => 'test',
   'y' => 10,
 ]);
+
+$vo2 = $vo->with(['y' => $vo->y + 1]);
 ```
 
 This helper also supports upcasting and downcasting. See upcasting/downcasting sections.
 
 Constructor parameters must have a default value to become optional in the input array.
+The parameters also must have a typehint.
 
 By default the method reports any unexpected properties of the input through `UnknownProperty` violation.
-This can be turned off by passing true as the 3rd parameter to the `constructFromArray` method.
+This can be turned off by passing true as the 3rd parameter `$ignoreExtraProperties`.
 
 Basically, this method throws the same violations as DataTransferObject.
+
+The `combineWithArray` method expects that non-instance properties exists with the same name as each constructor parameter,
+that is not passed as the `$data` argument to the `combineWithArray` method.
+These properties must have a compatible type with the respective constructor parameter.
+Calling the `combineWithArray` method on objects that don't obey this rule, will result in a LogicException
+and no violations will be reported. 
+
+The `extractConstructorArguments` method expects non-instance properties exist with the same name as each constructor parameter,
+These properties must have a compatible type with the respective constructor parameter.
+Calling the `extractConstructorArguments` method on objects that don't obey this rule, will result in a LogicException
+and no violations will be reported. 
 
 Note: writing these value objects will become even easier with PHP8's constructor promotion.
 If you only need your object constructed from array and the constructor itself seems like a burden,
 you should consider DataTransferObject instead.
+
+#### DataStructure
+
+This is basically a wrapper for FromArrayConstructor capabilities, which also provides
+from and to array upcasting/downcasting capabilities.
+This is the most solid base for an immutable data structure, if you are willing
+to write the constructor with all its properties.
+If you are not willing, use DataTransferObject.
+However with PHP8's constructor promotion feature, this will become equally simple
+and the DataStructure class will become the choice #1.
+
+```
+class MyStructure extends DataStructure
+{
+  private NonEmptyString $name;
+  private PositiveInteger $age;
+
+  public function __construct(NonEmptyString $name, PositiveInteger $age)
+  {
+    $this->name = $name;
+    $this->age = $age;
+  }
+
+  public function getName(): NonEmptyString
+  {
+    return $this->name;
+  }
+
+  public function getAge(): PositiveInteger
+  {
+    return $this->age;
+  }
+}
+
+// automatically construct from array, potentialy using upcasting/downcasting
+$vo = MyStructure::fromArray([
+  'name' => 'Slim Shady',
+  'age' => 18,
+]);
+
+// automatic withers with upcasting/downcasting ability
+$vo2 = $vo->with(['age' => 19]);
+
+// automatic to array conversion
+echo \json_encode($vo2->toArray()); // {"name": "Slim Shady", "age": 19}
+
+$vo->with(['name' => '']); // throws ViolationExceptionInterface
+``` 
 
 ### Standards
 

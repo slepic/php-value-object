@@ -49,4 +49,12 @@ abstract class StringEnumBase extends StringValue implements FromStringConstruct
      * @return array<string>
      */
     abstract protected static function createAllUniqueValues(): array;
+
+    /**
+     * @throws \BadMethodCallException
+     */
+    public function __clone()
+    {
+        throw new \BadMethodCallException('StrongEnum cannot be cloned.');
+    }
 }

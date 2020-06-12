@@ -4,6 +4,8 @@ namespace Slepic\ValueObject\Collections;
 
 class ImmutableArrayIterator implements \Iterator, \Countable, \ArrayAccess
 {
+    use ImmutableArrayAccessTrait;
+
     private \ArrayIterator $items;
 
     public function __construct(array $items)
@@ -54,15 +56,5 @@ class ImmutableArrayIterator implements \Iterator, \Countable, \ArrayAccess
     public function offsetGet($offset)
     {
         return $this->items->offsetGet($offset);
-    }
-
-    final public function offsetSet($offset, $value): void
-    {
-        throw new \BadMethodCallException('This is a read-only collection.');
-    }
-
-    final public function offsetUnset($offset): void
-    {
-        throw new \BadMethodCallException('This is a read-only collection.');
     }
 }
