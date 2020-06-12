@@ -2,10 +2,13 @@
 
 namespace Slepic\ValueObject\Strings;
 
+use Slepic\ValueObject\ImmutableObjectTrait;
 use Slepic\ValueObject\Type\Downcasting\ToStringConvertibleInterface;
 
 class StringValue implements \JsonSerializable, ToStringConvertibleInterface
 {
+    use ImmutableObjectTrait;
+
     private string $value;
 
     public function __construct(string $value)

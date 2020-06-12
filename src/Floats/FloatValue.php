@@ -2,10 +2,13 @@
 
 namespace Slepic\ValueObject\Floats;
 
+use Slepic\ValueObject\ImmutableObjectTrait;
 use Slepic\ValueObject\Type\Downcasting\ToFloatConvertibleInterface;
 
 class FloatValue implements \JsonSerializable, ToFloatConvertibleInterface
 {
+    use ImmutableObjectTrait;
+
     private float $value;
 
     public function __construct(float $value)
