@@ -20,6 +20,9 @@
         "phpunit/phpunit": "^9.1",
         "squizlabs/php_codesniffer": "^3.5"
     },
+    "suggest": {
+        "ext-mbstring": "Install if you want to use the multi-byte string length value objects."
+    },
     "autoload": {
         "psr-4": {
             "Slepic\\ValueObject\\": "src"

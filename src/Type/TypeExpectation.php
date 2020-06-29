@@ -20,17 +20,6 @@ final class TypeExpectation implements TypeExpectationInterface
         bool $acceptsBool,
         bool $acceptsArray
     ) {
-        $acceptsAny = $acceptsClass
-            || $acceptsString
-            || $acceptsInt
-            || $acceptsFloat
-            || $acceptsBool
-            || $acceptsArray;
-
-        if (!$acceptsAny) {
-            throw new \InvalidArgumentException('Cannot expect nothing.');
-        }
-
         $this->acceptsClass = $acceptsClass;
         $this->acceptsString = $acceptsString;
         $this->acceptsInt = $acceptsInt;

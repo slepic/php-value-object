@@ -10,6 +10,7 @@ use Slepic\ValueObject\Type\IntType;
 use Slepic\ValueObject\Type\NullableType;
 use Slepic\ValueObject\Type\StringType;
 use Slepic\ValueObject\Type\TypeInterface;
+use Slepic\ValueObject\Type\VoidType;
 
 final class Type
 {
@@ -18,6 +19,7 @@ final class Type
     private const PHP_FLOAT = 'float';
     private const PHP_BOOL = 'bool';
     private const PHP_ARRAY = 'array';
+    private const PHP_VOID = 'void';
 
     private function __construct()
     {
@@ -63,6 +65,8 @@ final class Type
                 return new BoolType();
             case self::PHP_ARRAY:
                 return new ArrayType();
+            case self::PHP_VOID:
+                return new VoidType();
             default:
                 throw new \InvalidArgumentException("Not a builtin type: $name.");
         }
