@@ -676,3 +676,15 @@ It is of course possible to throw the unified ViolationExceptionInterface from a
 But this cannot happen within the automatic upcasting, since it happens through static named constructors. 
 But there is no problem passing an already created value object to an automatically constructed value object from this package.
 And that makes it irrelevant whether the passed-in value object needed database to be created or not. 
+
+
+# Similar projects and inspiration
+
+* [spatie/data-transfer-object](https://github.com/spatie/data-transfer-object) 
+  * This was a great inspiration to begin with
+  * The class DataTransferObject got its name because of this package
+* [immutablephp/immutable](https://github.com/immutablephp/immutable)
+  * Rather simpler implementation of immutable value objects
+  * This inspired the creation of the immutable traits in this package 
+
+Thank you, guys!
