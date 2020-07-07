@@ -5,18 +5,11 @@ namespace Slepic\ValueObject\Collections;
 use Slepic\ValueObject\Type\TypeExpectationInterface;
 use Slepic\ValueObject\ViolationInterface;
 
-final class InvalidPropertyValue extends PropertyViolation
+/**
+ * @deprecated use CollectionViolation
+ */
+final class InvalidPropertyValue extends CollectionViolation
 {
-    /**
-     * @var mixed
-     */
-    private $value;
-
-    /**
-     * @var array<ViolationInterface>
-     */
-    private array $violations;
-
     /**
      * @param string $key
      * @param TypeExpectationInterface $expectation
@@ -31,24 +24,6 @@ final class InvalidPropertyValue extends PropertyViolation
         array $violations,
         string $message = ''
     ) {
-        $this->value = $value;
-        $this->violations = $violations;
-        parent::__construct($key, $expectation, $message);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getValue()
-    {
-        return $this->value;
-    }
-
-    /**
-     * @return array<ViolationInterface>
-     */
-    public function getViolations(): array
-    {
-        return $this->violations;
+        parent::__construct($key, $expectation, $violations, $value, $message);
     }
 }

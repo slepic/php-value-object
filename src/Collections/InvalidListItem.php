@@ -3,19 +3,12 @@
 namespace Slepic\ValueObject\Collections;
 
 use Slepic\ValueObject\Type\TypeExpectationInterface;
-use Slepic\ValueObject\Violation;
-use Slepic\ValueObject\ViolationInterface;
 
-final class InvalidListItem extends Violation implements CollectionItemViolationInterface
+/**
+ * @deprecated use CollectionViolation
+ */
+final class InvalidListItem extends CollectionViolation
 {
-    private int $key;
-    private TypeExpectationInterface $expectation;
-
-    /**
-     * @var mixed
-     */
-    private $value;
-    private array $violations;
 
     /**
      * @param int $key
@@ -31,36 +24,6 @@ final class InvalidListItem extends Violation implements CollectionItemViolation
         array $violations,
         string $message = ''
     ) {
-        $this->key = $key;
-        $this->expectation = $expectation;
-        $this->value = $value;
-        $this->violations = $violations;
-        parent::__construct($message ?: "Invalid item on index $key.");
-    }
-
-    public function getKey(): int
-    {
-        return $this->key;
-    }
-
-    public function getExpectation(): TypeExpectationInterface
-    {
-        return $this->expectation;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getValue()
-    {
-        return $this->value;
-    }
-
-    /**
-     * @return array<ViolationInterface>
-     */
-    public function getViolations(): array
-    {
-        return $this->violations;
+        parent::__construct($key, $expectation, $violations, $value, $message ?: "Invalid item on index $key.");
     }
 }

@@ -2,17 +2,13 @@
 
 namespace Slepic\ValueObject\Collections;
 
-use Slepic\ValueObject\Violation;
+use Slepic\ValueObject\Type;
 
-final class UnknownProperty extends Violation
+/**
+ * @deprecated use CollectionViolation
+ */
+final class UnknownProperty extends CollectionViolation
 {
-    private string $key;
-
-    /**
-     * @var mixed
-     */
-    private $value;
-
     /**
      * @param string $key
      * @param mixed $value
@@ -20,21 +16,12 @@ final class UnknownProperty extends Violation
      */
     public function __construct(string $key, $value, string $message = '')
     {
-        $this->key = $key;
-        $this->value = $value;
-        parent::__construct($message ?: "Property \"$key\" wasn't expected.");
-    }
-
-    public function getKey(): string
-    {
-        return $this->key;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getValue()
-    {
-        return $this->value;
+        parent::__construct(
+            $key,
+            Type::forBuiltinType('void')->getExpectation(),
+            [new Type\TypeViolation()],
+            $value,
+            $message ?: "Property \"$key\" wasn't expected."
+        );
     }
 }
