@@ -39,7 +39,7 @@ abstract class DataTransferObject
                 try {
                     $this->$key = $type->prepareValue($value);
                 } catch (ViolationExceptionInterface $e) {
-                    $violations[] = new InvalidPropertyValue(
+                    $violations[] = NestedViolation::invalidProperty(
                         $key,
                         $type->getExpectation(),
                         $value,
@@ -49,14 +49,14 @@ abstract class DataTransferObject
                 unset($data[$key]);
             } else {
                 if (!$property->isInitialized($this)) {
-                    $violations[] = new MissingRequiredProperty($key, $type->getExpectation());
+                    $violations[] = NestedViolation::missingRequiredProperty($key, $type->getExpectation());
                 }
             }
         }
 
         if (!static::IGNORE_UNKNOWN_PROPERTIES) {
             foreach ($data as $key => $value) {
-                $violations[] = new UnknownProperty($key, $value);
+                $violations[] = NestedViolation::unknownProperty($key, $value);
             }
         }
 

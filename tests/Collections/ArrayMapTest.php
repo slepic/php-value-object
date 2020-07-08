@@ -4,7 +4,7 @@ namespace Slepic\Tests\ValueObject\Collections;
 
 use PHPUnit\Framework\TestCase;
 use Slepic\ValueObject\Collections\ArrayMap;
-use Slepic\ValueObject\Collections\InvalidPropertyValue;
+use Slepic\ValueObject\Collections\NestedViolationInterface;
 use Slepic\ValueObject\Integers\IntegerValue;
 use Slepic\ValueObject\Type\TypeViolation;
 use Slepic\ValueObject\ViolationExceptionInterface;
@@ -79,7 +79,7 @@ final class ArrayMapTest extends TestCase
             self::assertCount(2, $violations);
 
             $violation = \array_shift($violations);
-            if ($violation instanceof InvalidPropertyValue) {
+            if ($violation instanceof NestedViolationInterface) {
                 self::assertSame('b', $violation->getKey());
                 self::assertSame(2.0, $violation->getValue());
                 $subViolations = $violation->getViolations();
@@ -91,7 +91,7 @@ final class ArrayMapTest extends TestCase
             }
 
             $violation = \array_shift($violations);
-            if ($violation instanceof InvalidPropertyValue) {
+            if ($violation instanceof NestedViolationInterface) {
                 self::assertSame('c', $violation->getKey());
                 self::assertSame('3', $violation->getValue());
                 $subViolations = $violation->getViolations();

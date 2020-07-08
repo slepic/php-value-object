@@ -3,11 +3,9 @@
 namespace Slepic\Tests\ValueObject\Collections;
 
 use PHPUnit\Framework\TestCase;
+use Slepic\ValueObject\Collections\NestedViolationInterface;
 use Slepic\ValueObject\Collections\DataTransferObject;
-use Slepic\ValueObject\Collections\InvalidPropertyValue;
 use Slepic\ValueObject\Collections\ListOfInts;
-use Slepic\ValueObject\Collections\MissingRequiredProperty;
-use Slepic\ValueObject\Collections\UnknownProperty;
 use Slepic\ValueObject\Type\TypeViolation;
 use Slepic\ValueObject\ViolationExceptionInterface;
 
@@ -76,7 +74,7 @@ class DataTransferObjectTest extends TestCase
             $violations = $e->getViolations();
             self::assertCount(1, $violations);
             $violation = \reset($violations);
-            if ($violation instanceof MissingRequiredProperty) {
+            if ($violation instanceof NestedViolationInterface) {
                 self::assertSame('xyz', $violation->getKey());
             } else {
                 self::assertTrue(false, 'Violation has incorrect type.');
@@ -111,7 +109,7 @@ class DataTransferObjectTest extends TestCase
             $violations = $e->getViolations();
             self::assertCount(1, $violations);
             $violation = \reset($violations);
-            if ($violation instanceof InvalidPropertyValue) {
+            if ($violation instanceof NestedViolationInterface) {
                 self::assertSame('xyz', $violation->getKey());
                 self::assertSame($input['xyz'], $violation->getValue());
                 $subViolations = $violation->getViolations();
@@ -149,7 +147,7 @@ class DataTransferObjectTest extends TestCase
             $violations = $e->getViolations();
             self::assertCount(1, $violations);
             $violation = \reset($violations);
-            if ($violation instanceof InvalidPropertyValue) {
+            if ($violation instanceof NestedViolationInterface) {
                 self::assertSame('xyz', $violation->getKey());
                 self::assertSame(null, $violation->getValue());
                 $subViolations = $violation->getViolations();
@@ -179,7 +177,7 @@ class DataTransferObjectTest extends TestCase
             $violations = $e->getViolations();
             self::assertCount(2, $violations);
             $violation = \array_shift($violations);
-            if ($violation instanceof InvalidPropertyValue) {
+            if ($violation instanceof NestedViolationInterface) {
                 self::assertSame('int', $violation->getKey());
                 self::assertSame('string', $violation->getValue());
                 $subViolations = $violation->getViolations();
@@ -190,7 +188,7 @@ class DataTransferObjectTest extends TestCase
                 self::assertTrue(false, 'Invalid violation type');
             }
             $violation = \array_shift($violations);
-            if ($violation instanceof InvalidPropertyValue) {
+            if ($violation instanceof NestedViolationInterface) {
                 self::assertSame('string', $violation->getKey());
                 self::assertSame(10, $violation->getValue());
                 $subViolations = $violation->getViolations();
@@ -218,7 +216,7 @@ class DataTransferObjectTest extends TestCase
             $violations = $e->getViolations();
             self::assertCount(1, $violations);
             $violation = \reset($violations);
-            if ($violation instanceof UnknownProperty) {
+            if ($violation instanceof NestedViolationInterface) {
                 self::assertSame('extra', $violation->getKey());
                 self::assertSame('value', $violation->getValue());
             } else {

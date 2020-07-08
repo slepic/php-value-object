@@ -6,12 +6,9 @@ use Slepic\ValueObject\Type\TypeExpectationInterface;
 use Slepic\ValueObject\ViolationInterface;
 
 /**
- * Represents violation of a collection when
- * a collection key is valid, but the item does not meet expectation.
- *
  * @psalm-template TKey
  */
-interface CollectionItemViolationInterface extends ViolationInterface
+interface NestedViolationInterface extends ViolationInterface
 {
     /**
      * @psalm-return TKey
@@ -19,5 +16,15 @@ interface CollectionItemViolationInterface extends ViolationInterface
      */
     public function getKey();
 
+    /**
+     * @return mixed
+     */
+    public function getValue();
+
     public function getExpectation(): TypeExpectationInterface;
+
+    /**
+     * @return ViolationInterface[]
+     */
+    public function getViolations(): array;
 }
