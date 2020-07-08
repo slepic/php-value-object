@@ -17,11 +17,6 @@ final class ListOfStrings extends ArrayList implements
         return parent::current();
     }
 
-    /**
-     * @param array $value
-     * @return static
-     * @throws \Slepic\ValueObject\ViolationExceptionInterface
-     */
     public static function fromArray(array $value): self
     {
         return new self($value);
