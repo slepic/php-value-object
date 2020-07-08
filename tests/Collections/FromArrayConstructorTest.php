@@ -3,7 +3,7 @@
 namespace Slepic\Tests\ValueObject\Collections;
 
 use PHPUnit\Framework\TestCase;
-use Slepic\ValueObject\Collections\NestedViolation;
+use Slepic\ValueObject\Collections\NestedViolationInterface;
 use Slepic\ValueObject\Collections\FromArrayConstructor;
 use Slepic\ValueObject\DateTime\DateTimeValue;
 use Slepic\ValueObject\Integers\IntegerValue;
@@ -110,7 +110,7 @@ final class FromArrayConstructorTest extends TestCase
             self::assertCount(3, $violations);
 
             $violation = \array_shift($violations);
-            if ($violation instanceof NestedViolation) {
+            if ($violation instanceof NestedViolationInterface) {
                 self::assertSame('x', $violation->getKey());
                 self::assertSame(10, $violation->getValue());
                 $subViolations = $violation->getViolations();
@@ -122,14 +122,14 @@ final class FromArrayConstructorTest extends TestCase
             }
 
             $violation = \array_shift($violations);
-            if ($violation instanceof NestedViolation) {
+            if ($violation instanceof NestedViolationInterface) {
                 self::assertSame('y', $violation->getKey());
             } else {
                 self::assertTrue(false, 'Unexpected violation type.');
             }
 
             $violation = \array_shift($violations);
-            if ($violation instanceof NestedViolation) {
+            if ($violation instanceof NestedViolationInterface) {
                 self::assertSame('z', $violation->getKey());
                 self::assertSame('extra', $violation->getValue());
             } else {
@@ -214,7 +214,7 @@ final class FromArrayConstructorTest extends TestCase
             self::assertCount(2, $violations);
 
             $violation = \array_shift($violations);
-            if ($violation instanceof NestedViolation) {
+            if ($violation instanceof NestedViolationInterface) {
                 self::assertSame('x', $violation->getKey());
                 self::assertSame(10, $violation->getValue());
                 $subViolations = $violation->getViolations();
@@ -226,7 +226,7 @@ final class FromArrayConstructorTest extends TestCase
             }
 
             $violation = \array_shift($violations);
-            if ($violation instanceof NestedViolation) {
+            if ($violation instanceof NestedViolationInterface) {
                 self::assertSame('w', $violation->getKey());
                 self::assertSame('extra', $violation->getValue());
             } else {

@@ -3,7 +3,7 @@
 namespace Slepic\Tests\ValueObject\Collections;
 
 use PHPUnit\Framework\TestCase;
-use Slepic\ValueObject\Collections\NestedViolation;
+use Slepic\ValueObject\Collections\NestedViolationInterface;
 use Slepic\ValueObject\Type\TypeViolation;
 use Slepic\ValueObject\ViolationExceptionInterface;
 
@@ -49,7 +49,7 @@ final class DataStructureTest extends TestCase
             self::assertCount(3, $violations);
 
             $violation = \array_shift($violations);
-            if ($violation instanceof NestedViolation) {
+            if ($violation instanceof NestedViolationInterface) {
                 self::assertSame('y', $violation->getKey());
                 self::assertSame(10, $violation->getValue());
                 $subViolations = $violation->getViolations();
@@ -61,14 +61,14 @@ final class DataStructureTest extends TestCase
             }
 
             $violation = \array_shift($violations);
-            if ($violation instanceof NestedViolation) {
+            if ($violation instanceof NestedViolationInterface) {
                 self::assertSame('z', $violation->getKey());
             } else {
                 self::assertTrue(false, 'Bad violation type.');
             }
 
             $violation = \array_shift($violations);
-            if ($violation instanceof NestedViolation) {
+            if ($violation instanceof NestedViolationInterface) {
                 self::assertSame('extra', $violation->getKey());
                 self::assertSame('null', $violation->getValue());
             } else {
