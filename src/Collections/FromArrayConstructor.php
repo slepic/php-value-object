@@ -55,7 +55,7 @@ final class FromArrayConstructor
 
         if (!$ignoreExtraProperties) {
             foreach ($input as $key => $value) {
-                $violations[] = new UnknownProperty($key, $value);
+                $violations[] = new UnknownProperty((string) $key, $value);
             }
         }
 
@@ -134,7 +134,7 @@ final class FromArrayConstructor
 
         if (!$ignoreExtraProperties) {
             foreach ($input as $key => $value) {
-                $violations[] = new UnknownProperty($key, $value);
+                $violations[] = new UnknownProperty((string) $key, $value);
             }
         }
 

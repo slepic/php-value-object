@@ -14,7 +14,7 @@ final class InvalidListItem extends CollectionViolation
      * @param int $key
      * @param TypeExpectationInterface $expectation
      * @param mixed $value
-     * @param array $violations
+     * @param array<\Slepic\ValueObject\ViolationInterface> $violations
      * @param string $message
      */
     public function __construct(

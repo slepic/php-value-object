@@ -6,9 +6,18 @@ use Slepic\ValueObject\Type;
 use Slepic\ValueObject\ViolationException;
 use Slepic\ValueObject\ViolationExceptionInterface;
 
+/**
+ * @template TValue
+ * @template-extends ImmutableArrayIterator<string, TValue>
+ */
 abstract class ArrayMap extends ImmutableArrayIterator implements \JsonSerializable
 {
-    public function __construct(array $value)
+    /**
+     * @psalm-param array<string, TValue> $input
+     * @param array<string, mixed> $input
+     * @throws ViolationException
+     */
+    public function __construct(array $input)
     {
         $reflection = new \ReflectionClass(static::class);
         $type = Type::forMethodReturnType($reflection->getMethod('current'));
@@ -16,14 +25,16 @@ abstract class ArrayMap extends ImmutableArrayIterator implements \JsonSerializa
         $items = [];
         $violations = [];
 
-        foreach ($value as $key => $item) {
+        foreach ($input as $key => $value) {
             try {
-                $items[$key] = $type->prepareValue($item);
+                /** @psalm-var TValue $item */
+                $item = $type->prepareValue($value);
+                $items[$key] = $item;
             } catch (ViolationExceptionInterface $e) {
                 $violations[] = new InvalidPropertyValue(
                     (string) $key,
                     $type->getExpectation(),
-                    $item,
+                    $value,
                     $e->getViolations()
                 );
             }

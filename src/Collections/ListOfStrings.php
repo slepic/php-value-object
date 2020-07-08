@@ -5,6 +5,9 @@ namespace Slepic\ValueObject\Collections;
 use Slepic\ValueObject\Type\Downcasting\ToArrayConvertibleInterface;
 use Slepic\ValueObject\Type\Upcasting\FromArrayConstructableInterface;
 
+/**
+ * @template-extends ArrayList<string>
+ */
 final class ListOfStrings extends ArrayList implements
     ToArrayConvertibleInterface,
     FromArrayConstructableInterface

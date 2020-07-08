@@ -26,7 +26,7 @@ class DateTimeValue implements
 
     private static function timezone(): \DateTimeZone
     {
-        return new \DateTimeZone(static::TIMEZONE);
+        return new \DateTimeZone((string) static::TIMEZONE);
     }
 
     /**
@@ -39,7 +39,7 @@ class DateTimeValue implements
         try {
             $dateTime = new \DateTimeImmutable($value, static::timezone());
         } catch (\Exception $e) {
-            throw DateTimeFormatViolation::exception(static::FORMAT);
+            throw DateTimeFormatViolation::exception((string) static::FORMAT);
         }
 
         return new static($dateTime);
@@ -112,7 +112,7 @@ class DateTimeValue implements
      */
     final public function __toString(): string
     {
-        return $this->value->format(static::FORMAT);
+        return $this->value->format((string) static::FORMAT);
     }
 
     final public function jsonSerialize(): string
