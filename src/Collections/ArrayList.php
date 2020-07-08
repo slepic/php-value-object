@@ -40,7 +40,7 @@ abstract class ArrayList extends ImmutableArrayIterator implements \JsonSerializ
                 $item = $type->prepareValue($value);
                 $items[] = $item;
             } catch (ViolationExceptionInterface $e) {
-                $violations[] = new InvalidListItem(
+                $violations[] = CollectionViolation::invalidItem(
                     $key,
                     $type->getExpectation(),
                     $value,

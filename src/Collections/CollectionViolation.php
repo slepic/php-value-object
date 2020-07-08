@@ -67,14 +67,31 @@ class CollectionViolation extends Violation implements CollectionViolationInterf
         return $this->violations;
     }
 
-
+    /**
+     * @param int $key
+     * @param TypeExpectationInterface $expectation
+     * @param mixed $value
+     * @param array $violations
+     * @return self
+     */
     public static function invalidItem(int $key, TypeExpectationInterface $expectation, $value, array $violations): self
     {
         return new self($key, $expectation, $violations, $value);
     }
 
-    public function invalidProperty(string $key, TypeExpectationInterface $expectation, $value, array $violations): self
-    {
+    /**
+     * @param string $key
+     * @param TypeExpectationInterface $expectation
+     * @param mixed $value
+     * @param array $violations
+     * @return self
+     */
+    public static function invalidProperty(
+        string $key,
+        TypeExpectationInterface $expectation,
+        $value,
+        array $violations
+    ): self {
         return new self($key, $expectation, $violations, $value);
     }
 
@@ -83,6 +100,11 @@ class CollectionViolation extends Violation implements CollectionViolationInterf
         return new self($key, $expectation, [new MissingValue()]);
     }
 
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @return self
+     */
     public static function unknownProperty(string $key, $value): self
     {
         return new self(
