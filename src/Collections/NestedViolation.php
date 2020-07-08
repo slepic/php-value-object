@@ -8,9 +8,9 @@ use Slepic\ValueObject\Violation;
 
 /**
  * @psalm-template TKey
- * @template-implements CollectionViolationInterface<TKey>
+ * @template-implements NestedViolationInterface<TKey>
  */
-class CollectionViolation extends Violation implements CollectionViolationInterface
+class NestedViolation extends Violation implements NestedViolationInterface
 {
     /**
      * @psalm-var TKey

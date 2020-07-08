@@ -3,7 +3,7 @@
 namespace Slepic\Tests\ValueObject\Collections;
 
 use PHPUnit\Framework\TestCase;
-use Slepic\ValueObject\Collections\CollectionViolation;
+use Slepic\ValueObject\Collections\NestedViolation;
 use Slepic\ValueObject\Collections\ListOfInts;
 use Slepic\ValueObject\Type\TypeViolation;
 use Slepic\ValueObject\ViolationExceptionInterface;
@@ -43,7 +43,7 @@ final class ListOfIntsTest extends TestCase
             $violations = $e->getViolations();
             self::assertCount(1, $violations);
             $violation = \reset($violations);
-            if ($violation instanceof CollectionViolation) {
+            if ($violation instanceof NestedViolation) {
                 self::assertSame(0, $violation->getKey());
                 self::assertSame('test', $violation->getValue());
                 $subViolations = $violation->getViolations();
@@ -65,7 +65,7 @@ final class ListOfIntsTest extends TestCase
             $violations = $e->getViolations();
             self::assertCount(2, $violations);
             $violation = \array_shift($violations);
-            if ($violation instanceof CollectionViolation) {
+            if ($violation instanceof NestedViolation) {
                 self::assertSame(2, $violation->getKey());
                 self::assertSame('test', $violation->getValue());
                 $subViolations = $violation->getViolations();
@@ -76,7 +76,7 @@ final class ListOfIntsTest extends TestCase
                 self::assertTrue(false, 'Invalid violation type');
             }
             $violation = \array_shift($violations);
-            if ($violation instanceof CollectionViolation) {
+            if ($violation instanceof NestedViolation) {
                 self::assertSame(4, $violation->getKey());
                 self::assertSame(11.1, $violation->getValue());
                 $subViolations = $violation->getViolations();

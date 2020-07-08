@@ -38,7 +38,7 @@ final class FromArrayConstructor
                 try {
                     $arguments[] = $type->prepareValue($value);
                 } catch (ViolationExceptionInterface $e) {
-                    $violations[] = CollectionViolation::invalidProperty(
+                    $violations[] = NestedViolation::invalidProperty(
                         $key,
                         $type->getExpectation(),
                         $value,
@@ -49,13 +49,13 @@ final class FromArrayConstructor
             } elseif ($parameter->isDefaultValueAvailable()) {
                 $arguments[] = $parameter->getDefaultValue();
             } else {
-                $violations[] = CollectionViolation::missingRequiredProperty($key, $type->getExpectation());
+                $violations[] = NestedViolation::missingRequiredProperty($key, $type->getExpectation());
             }
         }
 
         if (!$ignoreExtraProperties) {
             foreach ($input as $key => $value) {
-                $violations[] = CollectionViolation::unknownProperty((string) $key, $value);
+                $violations[] = NestedViolation::unknownProperty((string) $key, $value);
             }
         }
 
@@ -93,7 +93,7 @@ final class FromArrayConstructor
                 try {
                     $arguments[] = $type->prepareValue($value);
                 } catch (ViolationExceptionInterface $e) {
-                    $violations[] = CollectionViolation::invalidProperty(
+                    $violations[] = NestedViolation::invalidProperty(
                         $key,
                         $type->getExpectation(),
                         $value,
@@ -134,7 +134,7 @@ final class FromArrayConstructor
 
         if (!$ignoreExtraProperties) {
             foreach ($input as $key => $value) {
-                $violations[] = CollectionViolation::unknownProperty((string) $key, $value);
+                $violations[] = NestedViolation::unknownProperty((string) $key, $value);
             }
         }
 

@@ -8,7 +8,7 @@ use Slepic\ValueObject\ViolationInterface;
 /**
  * @psalm-template TKey
  */
-interface CollectionViolationInterface extends ViolationInterface
+interface NestedViolationInterface extends ViolationInterface
 {
     /**
      * @psalm-return TKey
