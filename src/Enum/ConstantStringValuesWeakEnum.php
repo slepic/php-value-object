@@ -26,6 +26,9 @@ class ConstantStringValuesWeakEnum extends StringValue implements FromStringCons
         return new static($value);
     }
 
+    /**
+     * @return array<string>
+     */
     public static function allowedValues(): array
     {
         $reflection = new \ReflectionClass(static::class);

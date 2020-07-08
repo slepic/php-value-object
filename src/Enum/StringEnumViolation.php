@@ -28,6 +28,10 @@ final class StringEnumViolation extends StringViolation
         return $this->allowedValues;
     }
 
+    /**
+     * @param array<string> $allowedValues
+     * @return ViolationExceptionInterface
+     */
     public static function exception(array $allowedValues): ViolationExceptionInterface
     {
         return ViolationException::for(new self($allowedValues));
