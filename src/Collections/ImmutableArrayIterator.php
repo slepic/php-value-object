@@ -2,12 +2,27 @@
 
 namespace Slepic\ValueObject\Collections;
 
+/**
+ * @template TKey of array-key
+ * @template TValue
+ *
+ * @template-implements \Iterator<TKey, TValue>
+ * @template-implements \ArrayAccess<TKey, TValue>
+ */
 class ImmutableArrayIterator implements \Iterator, \Countable, \ArrayAccess
 {
     use ImmutableArrayAccessTrait;
 
+    /**
+     * @psalm-var \ArrayIterator<TKey, TValue>
+     * @var \ArrayIterator
+     */
     private \ArrayIterator $items;
 
+    /**
+     * @param array $items
+     * @psalm-param array<TKey, TValue> $items
+     */
     public function __construct(array $items)
     {
         $this->items = new \ArrayIterator($items);
@@ -38,6 +53,10 @@ class ImmutableArrayIterator implements \Iterator, \Countable, \ArrayAccess
         return $this->items->current();
     }
 
+    /**
+     * @return array
+     * @psalm-return array<TKey, TValue>
+     */
     public function toArray(): array
     {
         return $this->items->getArrayCopy();

@@ -11,14 +11,18 @@ use Slepic\ValueObject\ViolationExceptionInterface;
  * Represents an array value object with keys being consecutive integers starting at 0.
  *
  * All values must have the same (super) type.
+ *
+ * @template TValue
+ * @template-extends ImmutableArrayIterator<int, TValue>
  */
 abstract class ArrayList extends ImmutableArrayIterator implements \JsonSerializable
 {
     /**
-     * @param array $value
+     * @psalm-param array<int, TValue> $input
+     * @param array<int, mixed> $input
      * @throws ViolationExceptionInterface
      */
-    public function __construct(array $value)
+    public function __construct(array $input)
     {
         $reflection = new \ReflectionClass($this);
         $type = Type::forMethodReturnType($reflection->getMethod('current'));
@@ -26,18 +30,20 @@ abstract class ArrayList extends ImmutableArrayIterator implements \JsonSerializ
         $index = 0;
         $items = [];
         $violations = [];
-        foreach ($value as $key => $item) {
+        foreach ($input as $key => $value) {
             if ($key !== $index) {
                 throw TypeViolation::exception('Expected 0-based indices.');
             }
 
             try {
-                $items[] = $type->prepareValue($item);
+                /** @psalm-var TValue $item */
+                $item = $type->prepareValue($value);
+                $items[] = $item;
             } catch (ViolationExceptionInterface $e) {
                 $violations[] = new InvalidListItem(
                     $key,
                     $type->getExpectation(),
-                    $item,
+                    $value,
                     $e->getViolations()
                 );
             }

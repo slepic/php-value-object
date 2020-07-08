@@ -15,13 +15,17 @@ final class InvalidListItem extends Violation implements CollectionItemViolation
      * @var mixed
      */
     private $value;
+
+    /**
+     * @var array<ViolationInterface>
+     */
     private array $violations;
 
     /**
      * @param int $key
      * @param TypeExpectationInterface $expectation
      * @param mixed $value
-     * @param array $violations
+     * @param array<ViolationInterface> $violations
      * @param string $message
      */
     public function __construct(

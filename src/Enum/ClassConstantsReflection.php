@@ -4,6 +4,10 @@ namespace Slepic\ValueObject\Enum;
 
 class ClassConstantsReflection
 {
+    /**
+     * @param \ReflectionClass $reflection
+     * @return array<string, string>
+     */
     public static function getUniqueStringConstantValues(\ReflectionClass $reflection): array
     {
         $all = [];
