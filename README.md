@@ -114,7 +114,7 @@ final class FullName
   {
     $violations = []
     if ($firstName === '') {
-      $violations[] = new Violation(''First name cannot be empty.');
+      $violations[] = new Violation('First name cannot be empty.');
     }
 
     if ($surname === '') {
